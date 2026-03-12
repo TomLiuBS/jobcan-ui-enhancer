@@ -2198,13 +2198,17 @@
   }
   
   .jobcan-enhanced .work-progress-track {
-    height: 14px;
+    height: 42px;
     width: 100%;
-    background-color: #cfd5dc;
+    background: linear-gradient(180deg, #475164 0%, #3f485b 100%);
     border-radius: 999px;
     overflow: hidden;
     position: relative;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -2px 4px rgba(17, 24, 39, 0.4),
+      0 2px 10px rgba(15, 23, 42, 0.25);
     margin-top: 0;
   }
 
@@ -2217,56 +2221,23 @@
 
   .jobcan-enhanced .work-schedule-segment {
     position: absolute;
-    top: 0;
-    height: 100%;
+    top: 3px;
+    height: calc(100% - 6px);
     border-radius: 999px;
+    transition: filter 0.2s ease;
   }
 
   .jobcan-enhanced .work-schedule-segment.segment-working {
     background: linear-gradient(90deg, var(--color-work-segment-working-start) 0%, var(--color-work-segment-working-end) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 6px 14px rgba(14, 165, 164, 0.22);
   }
 
   .jobcan-enhanced .work-schedule-segment.segment-off {
     background: linear-gradient(90deg, var(--color-work-segment-off-start) 0%, var(--color-work-segment-off-end) 100%);
-  }
-  
-  .jobcan-enhanced .work-progress-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.08) 100%);
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 2;
-    transition: width 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
-    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.65), 0 0 8px rgba(0, 102, 221, 0.2);
-    border-radius: 999px;
-  }
-  
-  /* Progress state classes */
-  .jobcan-enhanced .progress-state-inactive {
-    background-color: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 0 4px var(--color-gray-400);
-  }
-
-  .jobcan-enhanced .progress-state-starting {
-    background-color: rgba(30, 124, 242, 0.22);
-    box-shadow: 0 0 4px var(--shadow-primary);
-  }
-
-  .jobcan-enhanced .progress-state-halfway {
-    background-color: rgba(23, 162, 184, 0.25);
-    box-shadow: 0 0 4px var(--color-info);
-  }
-
-  .jobcan-enhanced .progress-state-good {
-    background-color: rgba(40, 167, 69, 0.24);
-    box-shadow: 0 0 4px var(--color-success);
-  }
-
-  .jobcan-enhanced .progress-state-complete {
-    background-color: rgba(26, 95, 160, 0.24);
-    box-shadow: 0 0 6px var(--color-success-dark);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
   
   .jobcan-enhanced .work-progress-percentage {
@@ -2284,12 +2255,13 @@
 
   .jobcan-enhanced .work-progress-inline-label {
     font-weight: 700;
-    color: #66717c;
+    color: #cfd7e3;
+    font-size: 11px;
   }
 
   .jobcan-enhanced .work-progress-inline-status {
     font-weight: 700;
-    color: #5f6872;
+    color: #e6edf7;
     min-width: 0;
     text-align: center;
     white-space: nowrap;
@@ -2311,13 +2283,14 @@
   
   .jobcan-enhanced .time-scale-marker {
     position: absolute;
-    top: 3px;
+    top: 50%;
     width: 1px;
-    height: 8px;
-    background-color: rgba(255, 255, 255, 0.4);
-    z-index: 10;
+    height: 13px;
+    background-color: rgba(237, 242, 247, 0.56);
+    z-index: 6;
     border-radius: 999px;
-    box-shadow: 0 0 0 1px rgba(16, 24, 40, 0.1);
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.18);
   }
 
   .jobcan-enhanced .work-punch-marker {
@@ -2331,6 +2304,25 @@
 
   .jobcan-enhanced .work-punch-marker:hover {
     transform: translate(-50%, -50%) scale(1.15);
+  }
+
+  .jobcan-enhanced .work-progress-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ef4444;
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.28), 0 2px 10px rgba(15, 23, 42, 0.35);
+    z-index: 9;
+    transition: transform 0.2s ease;
+  }
+
+  .jobcan-enhanced .work-progress-indicator::after {
+    display: none;
+  }
+
+  .jobcan-enhanced .work-progress-container:hover .work-progress-indicator {
+    transform: translate(-50%, -50%) scale(1.08);
   }
 
   .jbe-punch-tooltip {
@@ -2362,17 +2354,16 @@
   }
 
   .jobcan-enhanced body.dark-mode .work-progress-track {
-    background-color: #3f4855;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
-  }
-
-  .jobcan-enhanced body.dark-mode .work-progress-fill {
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.06) 100%);
-    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.45), 0 0 10px rgba(22, 119, 255, 0.28);
+    background: linear-gradient(180deg, #455063 0%, #3b4558 100%);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.45),
+      0 2px 12px rgba(0, 0, 0, 0.35);
   }
 
   .jobcan-enhanced body.dark-mode .work-progress-inline-label {
-    color: #c7d0db;
+    color: #d6deea;
   }
 
   .jobcan-enhanced body.dark-mode .work-progress-inline-status {
@@ -2380,8 +2371,8 @@
   }
 
   .jobcan-enhanced body.dark-mode .time-scale-marker {
-    background-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+    background-color: rgba(248, 250, 252, 0.62);
+    box-shadow: 0 0 0 1px rgba(2, 6, 23, 0.28);
   }
   
   .jobcan-enhanced .current-time-indicator {

@@ -1,0 +1,33 @@
+    
+  
+  /* ==========================================================================
+     2. Base Styles & Global Elements
+     ========================================================================== */
+  .jobcan-enhanced {
+    font-family: var(--font-family-base);
+    color: var(--color-text-primary);
+    line-height: 1.5;
+    background: none; /* remove static gradient on html */
+    height: auto;
+  }
+  
+  .jobcan-enhanced body {
+    background: linear-gradient(135deg,var(--color-background-gradient-start) 0%, var(--color-background-gradient-end) 100%) fixed; /* apply gradient on body */
+    background-repeat: no-repeat;
+    min-height: 100vh; /* ensure body covers full viewport height */
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    color: var(--color-text-primary);
+    line-height: 1.5;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .jobcan-enhanced .login-page-container {
+    background: linear-gradient(135deg,var(--color-background-gradient-start) 0%, var(--color-background-gradient-end) 100%);
+  }
+  
+  /* Hide footer */
+  .jobcan-enhanced #all-footer,
+  .jobcan-enhanced .jbc-footer {
+    display: none !important;
+  }

@@ -1,0 +1,90 @@
+/* Responsive Styles extracted from styles.css */
+
+/* Responsive table adjustments */
+@media (max-width: 768px) {
+  .jobcan-enhanced .table-responsive {
+    margin-left: -16px;
+    margin-right: -16px;
+    width: calc(100% + 32px);
+    border-radius: var(--border-radius-none);
+    border-left: none;
+    border-right: none;
+  }
+
+  .jobcan-enhanced td,
+  .jobcan-enhanced .table td,
+  .jobcan-enhanced .jbc-table td {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .jobcan-enhanced th,
+  .jobcan-enhanced .table th,
+  .jobcan-enhanced .jbc-table th {
+    padding: 12px;
+    font-size: 12px;
+  }
+}
+
+/* Responsive column classes */
+@media (min-width: 576px) {
+  .jobcan-enhanced .col-sm {
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 768px) {
+  .jobcan-enhanced .col-md {
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: 100%;
+  }
+
+  .jobcan-enhanced #sidemenu,
+  .jobcan-enhanced .sidemenu {
+    margin: 12px;
+  }
+
+  .jobcan-enhanced .clock,
+  .jobcan-enhanced #display-time,
+  .jobcan-enhanced .contentsArea h1 {
+    font-size: 48px;
+  }
+
+  .jobcan-enhanced .contentsArea {
+    padding: 8px;
+  }
+}
+
+@media (min-width: 992px) {
+  .jobcan-enhanced .col-lg {
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: 100%;
+  }
+}
+
+/* Mobile responsiveness for flip clock */
+@media (max-width: 768px) {
+  .jobcan-enhanced .flip-clock-digit {
+    width: 50px !important;
+    height: 75px !important;
+  }
+
+  .jobcan-enhanced .flip-clock-digit .flip-card-front,
+  .jobcan-enhanced .flip-clock-digit .flip-card-back {
+    font-size: 2rem !important;
+  }
+
+  .jobcan-enhanced .colon {
+    width: 20px !important;
+    height: 75px !important;
+    font-size: 2rem !important;
+  }
+
+  .jobcan-enhanced .flip-clock-settings-menu {
+    width: 180px !important;
+  }
+} 

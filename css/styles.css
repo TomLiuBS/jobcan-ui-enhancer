@@ -1,0 +1,4586 @@
+  
+  /* ==========================================================================
+     1. Layout & Structure
+     ========================================================================== */
+  .jobcan-enhanced .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: 0;
+    margin-left: 0;
+  }
+  
+  .jobcan-enhanced .col,
+  .jobcan-enhanced [class*="col-"] {
+    position: relative;
+    width: 100%;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+  
+  .jobcan-enhanced .no-gutters {
+    margin-right: 0;
+    margin-left: 0;
+  }
+  
+  .jobcan-enhanced .no-gutters > .col,
+  .jobcan-enhanced .no-gutters > [class*="col-"] {
+    padding-right: 0;
+    padding-left: 0;
+  }
+  
+  /* Content layout adjustments */
+  .jobcan-enhanced .contentsArea,
+  .jobcan-enhanced #main-content {
+    transition: width 0.3s ease-in-out, margin-right 0.3s ease-in-out, margin-left 0.3s ease-in-out;
+    padding: 16px;
+    background-color: transparent;
+    width: 100%;
+    margin-right: 0;
+    margin-top: 16px;
+    will-change: width, margin;
+  }
+  
+  /* Shrink main content when side panel is open */
+  .jobcan-enhanced #man-hour-manage-modal.show ~ .contentsArea,
+  .jobcan-enhanced #man-hour-manage-modal.show ~ #main-content,
+  .jobcan-enhanced body.modal-open .contentsArea,
+  .jobcan-enhanced body.modal-open #main-content,
+  .jobcan-enhanced #man-hour-manage-modal.show ~ .jbc-card,
+  .jobcan-enhanced body.modal-open .jbc-card {
+    width: calc(100% - 500px) !important;
+    margin-right: 500px !important;
+  }
+  
+  /* Main content spacing when using jbcid */
+  .jobcan-enhanced .main-contents-mt.use-jbcid {
+    margin-top: 80px;
+    background-color: transparent;
+  }
+  
+  /* Hide empty padding div */
+  .jobcan-enhanced .text-right.px-3.py-3 {
+    display: none !important;
+  }
+
+  .jobcan-enhanced .jbe-hidden {
+    display: none !important;
+  }
+
+  .jobcan-enhanced .jbe-signin-parent-positioned {
+    position: relative;
+  }
+
+  .jobcan-enhanced .jbe-signin-right-container {
+    background-color: var(--color-white);
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    padding: 20px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .jobcan-enhanced .jbe-signin-right-container.is-collapsed {
+    display: none;
+  }
+
+  .jobcan-enhanced .jbe-signin-child {
+    margin: 0 auto;
+    max-width: 100%;
+  }
+
+  .jobcan-enhanced .jbe-signin-child > * {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .jobcan-enhanced .jbe-signin-toggle-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+    margin: 4px;
+    display: block;
+    padding: 1px 6px;
+    background-color: var(--color-white);
+    color: #aaa;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 10px;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    height: 18px;
+    line-height: 1;
+  }
+
+  .jobcan-enhanced .jbe-signin-toggle-btn:hover {
+    opacity: 0.9;
+  }
+
+  .jobcan-enhanced .jbe-signin-toggle-btn.is-expanded {
+    top: 10px;
+    right: 10px;
+    margin: 0;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  /* PUSH button container styling */
+  .jobcan-enhanced .col.mb-3:has(#adit-button-push) {
+    padding: 0;
+  }
+  
+  /* ==========================================================================
+     2. Header & Navigation
+     ========================================================================== */
+  /* Header */
+  .jobcan-enhanced #header,
+  .jobcan-enhanced .headerArea {
+    background: linear-gradient(90deg, var(--color-primary-gradient-start) 0%, var(--color-primary-gradient-end) 100%);
+    border-bottom: none;
+    box-shadow: var(--shadow-header);
+    height: 80px;
+    display: flex;
+    align-items: center;
+    padding: 32px 16px;
+  }
+  
+ 
+  
+  /* Remove border-right from jbcid-logo */
+  .jobcan-enhanced .jbcid-logo {
+    border-right-color: transparent !important;
+    border-right-style: none !important;
+    border-right-width: 0 !important;
+    border-radius: var(--border-radius-lg);
+    padding-left: 4px;
+  }
+
+  .jobcan-enhanced .jbe-logo-no-border {
+    border-right-color: transparent !important;
+    border-right-style: none !important;
+    border-right-width: 0 !important;
+    border-right: none !important;
+    width: auto !important;
+    height: 10px !important;
+  }
+  
+  /* Header visibility control */
+  .jobcan-enhanced .jbcid-header {
+    position: fixed;
+    top: -24px; /* Hide it above the viewport by default */
+    left: 0;
+    width: 100%;
+    height: 24px;
+    z-index: var(--z-index-header);
+    background-color: transparent;
+    transition: top 0.3s ease;
+    box-shadow: none;
+    will-change: top;
+  }
+  
+  .jobcan-enhanced .jbcid-header.visible {
+    top: 0;
+  }
+
+  .jobcan-enhanced .jbcid-header.jbe-header-enhanced {
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  .jobcan-enhanced .jbcid-navbar-menu.jbcid-navbar-left.jbe-navbar-menu-enhanced {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    background-color: var(--color-white);
+    border-radius: 0 0 16px 16px;
+    box-shadow: var(--shadow-header);
+    padding: 8px;
+    border: 1px solid var(--color-gray-200, rgba(228, 230, 235, 0.6));
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .jobcan-enhanced .jbe-navbar-list {
+    display: flex;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .jobcan-enhanced .jbe-navbar-item {
+    padding: 6px 14px;
+    margin: 0 6px;
+    font-size: 14px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 75px;
+    height: 24px;
+    border-right: none;
+    color: var(--color-text-primary);
+    background-color: var(--color-black-4);
+  }
+
+  .jobcan-enhanced .jbe-navbar-item:hover {
+    background-color: var(--color-black-8);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-button-sm);
+  }
+
+  .jobcan-enhanced .jbe-navbar-item.jbe-navbar-item-active,
+  .jobcan-enhanced .jbe-navbar-item.active {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    font-weight: 600;
+    box-shadow: var(--shadow-button-sm);
+  }
+
+  .jobcan-enhanced .jbe-navbar-item.jbe-navbar-item-active:hover,
+  .jobcan-enhanced .jbe-navbar-item.active:hover {
+    transform: none;
+  }
+
+  .jobcan-enhanced .jbe-header-spaced {
+    margin-top: 24px;
+  }
+  
+  .jobcan-enhanced .jbcid-header-trigger {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    z-index: var(--z-index-header-trigger);
+    background-color: transparent;
+  }
+  
+  /* Override for .jbcid-header > .jbcid-navbar to remove background-color */
+  .jbcid-header > .jbcid-navbar {
+    background-color: unset !important;
+    padding-top: 8px;
+    padding-left: 16px;
+  }
+  
+  /* Manager name and staff dropdown styling */
+  .jobcan-enhanced #manager-name,
+  .jobcan-enhanced .dropdown#manager-name {
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: auto;
+    z-index: 0;
+  }
+  
+  .jobcan-enhanced #manager-name .dropdown-toggle,
+  .jobcan-enhanced .dropdown#manager-name .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    color: var(--color-white);
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-6);
+    background-color: var(--color-white-10);
+    transition: var(--transition);
+    border: 1px solid var(--color-white-20);
+  }
+  
+  .jobcan-enhanced #manager-name .dropdown-toggle:hover,
+  .jobcan-enhanced .dropdown#manager-name .dropdown-toggle:hover {
+    background-color: var(--color-white-20);
+  }
+  
+  .jobcan-enhanced #manager-name .dropdown-toggle::after,
+  .jobcan-enhanced .dropdown#manager-name .dropdown-toggle::after {
+    display: inline-block;
+    margin-left: 8px;
+    vertical-align: 0.255em;
+    content: "";
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+  }
+  
+  .jobcan-enhanced #manager-name .dropdown-menu,
+  .jobcan-enhanced .dropdown#manager-name .dropdown-menu {
+    min-width: 160px;
+    padding: 0;
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    text-align: left;
+    background-color: var(--color-card);
+    background-clip: padding-box;
+    border: 1px solid var(--color-black-10);
+    border-radius: var(--border-radius-6);
+    box-shadow: var(--shadow-dropdown);
+    right: 0;
+    left: auto;
+    top: 100%;
+    position: absolute;
+    z-index: var(--z-index-dropdown);
+    display: none;
+    animation: fadeIn 0.2s ease-out;
+    transform-origin: top right;
+    will-change: transform, opacity;
+  }
+  
+  .jobcan-enhanced #manager-name.show .dropdown-menu,
+  .jobcan-enhanced .dropdown#manager-name.show .dropdown-menu {
+    display: block;
+  }
+  
+  .jobcan-enhanced #manager-name .dropdown-item,
+  .jobcan-enhanced .dropdown#manager-name .dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    clear: both;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    text-decoration: none;
+  }
+  
+  .jobcan-enhanced #manager-name .dropdown-item:hover,
+  .jobcan-enhanced .dropdown#manager-name .dropdown-item:hover {
+    color: var(--color-primary);
+    text-decoration: none;
+    background-color: var(--color-primary-light);
+  }
+
+  .jobcan-enhanced .jbe-manager-dropdown-menu {
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-dropdown);
+    border: 1px solid var(--color-gray-200);
+    padding: 0.5rem 0;
+  }
+
+  .jobcan-enhanced .jbe-manager-dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: background-color 150ms ease;
+  }
+
+  .jobcan-enhanced a#rollover-menu-link.jbe-rollover-toggle::after {
+    display: none !important;
+  }
+
+  .jobcan-enhanced .jbe-rollover-user-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .jobcan-enhanced .jbe-rollover-user-code {
+    font-size: 10px;
+  }
+  
+  /* Staff settings icon button */
+  .jobcan-enhanced .staff-settings-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: var(--color-white-10);
+    color: var(--color-white);
+    border-radius: var(--border-radius-6);
+    margin-left: 8px;
+    border: 1px solid var(--color-white-20);
+    transition: var(--transition);
+  }
+  
+  .jobcan-enhanced .staff-settings-btn:hover {
+    background-color: var(--color-white-20);
+  }
+  
+  .jobcan-enhanced .staff-settings-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--color-white);
+  }
+  
+  /* Hide rollover menu dropdown */
+  .jobcan-enhanced #rollover-menu,
+  .jobcan-enhanced .dropdown-menu-right {
+    display: none !important;
+  }
+  
+  .jobcan-enhanced .dropdown-menu-right {
+    display: none !important;
+  }
+  /* Hide additional dropdown menu by aria-labelledby */
+  .jobcan-enhanced .dropdown-menu[aria-labelledby="menu_order_img"] {
+    display: none !important;
+  }
+  .jobcan-enhanced .dropdown-menu[aria-labelledby="menu_order_img"].show {
+    display: block !important;
+  }
+
+  /* ==========================================================================
+     3. Side Menu & Navigation
+     ========================================================================== */
+  .jobcan-enhanced #sidemenu,
+  .jobcan-enhanced .sidemenu,
+  .jobcan-enhanced .jbc-sidemenu {
+    background-color: var(--color-card);
+    box-shadow: var(--shadow);
+    border-radius: var(--border-radius-md);
+    margin: 16px;
+    padding: 16px 0;
+    overflow: hidden;
+    position: relative;
+    z-index: var(--z-index-sidemenu);
+    transition: all 0.3s ease;
+    left: 0;
+    width: 256px;
+    will-change: transform, opacity;
+  }
+  
+  /* Sidemenu closed state */
+  .jobcan-enhanced .jbc-sidemenu.side-closed,
+  .jobcan-enhanced #sidemenu.side-closed,
+  .jobcan-enhanced .sidemenu.side-closed {
+    overflow: hidden;
+    left: -256px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  
+  /* Ensure the content shifts when menu closes */
+  .jobcan-enhanced .side-closed ~ .contentsArea,
+  .jobcan-enhanced .side-closed ~ #main-content {
+    margin-left: 48px; /* Width of the collapsed menu button */
+  }
+  
+  /* Collapsed/closed sidemenu styling */
+  .jobcan-enhanced #sidemenu-closed,
+  .jobcan-enhanced .jbc-sidemenu-closed {
+    background-color: var(--color-card);
+    box-shadow: var(--shadow);
+    border-radius: var(--border-radius-none) var(--border-radius-md) var(--border-radius-md) var(--border-radius-none);
+    position: fixed;
+    top: 80px;
+    left: 0;
+    width: 48px;
+    z-index: var(--z-index-sidemenu);
+    padding: 0;
+    overflow: hidden;
+    transition: var(--transition);
+    cursor: pointer;
+  }
+  
+  .jobcan-enhanced #sidemenu-closed .btn,
+  .jobcan-enhanced .jbc-sidemenu-closed .btn,
+  .jobcan-enhanced .jbc-sidemenu-btn {
+    background-color: transparent;
+    color: var(--color-text-primary);
+    border: none;
+    border-radius: var(--border-radius-none);
+    padding: 12px;
+    margin: 0;
+    width: 100%;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
+    transition: var(--transition);
+  }
+  
+  .jobcan-enhanced #sidemenu-closed .btn:hover,
+  .jobcan-enhanced .jbc-sidemenu-closed .btn:hover,
+  .jobcan-enhanced .jbc-sidemenu-btn:hover {
+    background-color: var(--color-primary-hover-bg);
+    color: var(--color-primary);
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .jobcan-enhanced #sidemenu-closed svg,
+  .jobcan-enhanced .jbc-sidemenu-closed svg {
+    fill: var(--color-secondary);
+    transition: var(--transition);
+  }
+  
+  .jobcan-enhanced #sidemenu-closed .btn:hover svg,
+  .jobcan-enhanced .jbc-sidemenu-closed .btn:hover svg {
+    fill: var(--color-primary);
+  }
+  
+  /* Fix for duplicate sidemenus */
+  .jobcan-enhanced .sidemenu + .sidemenu,
+  .jobcan-enhanced #sidemenu + #sidemenu,
+  .jobcan-enhanced .sidemenu.hidden,
+  .jobcan-enhanced #sidemenu.hidden,
+  .jobcan-enhanced .sidemenu[style*="display: none"],
+  .jobcan-enhanced #sidemenu[style*="display: none"] {
+    display: none !important;
+  }
+  
+  /* Ensure proper display for open/closed states */
+  .jobcan-enhanced .menuArea[style*="display: none"] + .menuArea,
+  .jobcan-enhanced .menuArea.closed + .menuArea,
+  .jobcan-enhanced .sidebar-collapsed .sidemenu,
+  .jobcan-enhanced .sidebar-hidden .sidemenu,
+  .jobcan-enhanced .menu-collapsed .sidemenu,
+  .jobcan-enhanced .sidemenu.closed,
+  .jobcan-enhanced #sidemenu.closed {
+    display: none !important;
+  }
+  
+  /* Sidemenu links */
+  .jobcan-enhanced #sidemenu a,
+  .jobcan-enhanced .sidemenu a,
+  .jobcan-enhanced .menuArea a {
+    color: var(--color-text-primary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    padding: 12px 24px;
+    transition: var(--transition);
+    text-decoration: none;
+    margin: 4px 8px;
+    border-radius: var(--border-radius-md);
+    z-index: var(--z-index-sidemenu-link);
+  }
+  
+  .jobcan-enhanced #sidemenu a:hover,
+  .jobcan-enhanced .sidemenu a:hover,
+  .jobcan-enhanced .menuArea a:hover {
+    background-color: var(--color-primary-hover-bg);
+    color: var(--color-primary);
+  }
+  
+  .jobcan-enhanced #sidemenu a.active,
+  .jobcan-enhanced .sidemenu a.active,
+  .jobcan-enhanced .menuArea a.active {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+  }
+  
+  /* Hide close buttons in sidemenu */
+  .jobcan-enhanced .sidemenu-close,
+  .jobcan-enhanced .jbc-sidemenu-close,
+  .jobcan-enhanced [onclick*="closeSidemenu"],
+  .jobcan-enhanced button[aria-label="Close"],
+  .jobcan-enhanced .btn-close,
+  .jobcan-enhanced .close-btn {
+    display: none !important;
+  }
+  
+  /* Submenu styling */
+  .jobcan-enhanced .dropdown,
+  .jobcan-enhanced .dropdown-menu,
+  .jobcan-enhanced .dropdown-content,
+  .jobcan-enhanced ul.submenu,
+  .jobcan-enhanced .nav-submenu {
+    position: relative;
+    z-index: 0 !important;
+  }
+  
+  .jobcan-enhanced .dropdown-menu,
+  .jobcan-enhanced .dropdown-content,
+  .jobcan-enhanced ul.submenu,
+  .jobcan-enhanced .nav-submenu {
+    background-color: var(--color-card) !important;
+    border-radius: var(--border-radius-none) !important;
+    box-shadow: none !important;
+    border: none !important;
+    overflow: visible !important;
+    max-height: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .jobcan-enhanced .nav-item.has-submenu > ul,
+  .jobcan-enhanced .menu-item.has-children > ul {
+    position: relative !important;
+    left: 0 !important;
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-height: 1000px !important;
+    overflow: visible !important;
+    background-color: var(--color-white) !important;
+    border-radius: var(--border-radius-none) !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .jobcan-enhanced .nav-item.has-submenu > ul > li > a,
+  .jobcan-enhanced .menu-item.has-children > ul > li > a {
+    padding: 12px 24px !important;
+    font-size: 14px !important;
+    color: var(--color-text-primary) !important;
+    border-radius: var(--border-radius-none) !important;
+    margin: 0 !important;
+  }
+  
+  .jobcan-enhanced .nav-item.has-submenu > ul > li > a.active,
+  .jobcan-enhanced .menu-item.has-children > ul > li > a.active {
+    background-color: transparent !important;
+    color: var(--color-primary) !important;
+  }
+  
+  .jobcan-enhanced .nav-item.has-submenu > ul > li > a:hover,
+  .jobcan-enhanced .menu-item.has-children > ul > li > a:hover {
+    background-color: var(--color-primary-light) !important;
+  }
+
+  /* Dark mode side menu contrast tuning */
+  .jobcan-enhanced body.dark-mode #sidemenu a,
+  .jobcan-enhanced body.dark-mode .sidemenu a,
+  .jobcan-enhanced body.dark-mode .menuArea a {
+    color: #dbe2ea;
+  }
+
+  .jobcan-enhanced body.dark-mode #sidemenu a:hover,
+  .jobcan-enhanced body.dark-mode .sidemenu a:hover,
+  .jobcan-enhanced body.dark-mode .menuArea a:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #f5f7fb;
+  }
+
+  .jobcan-enhanced body.dark-mode #sidemenu a.active,
+  .jobcan-enhanced body.dark-mode .sidemenu a.active,
+  .jobcan-enhanced body.dark-mode .menuArea a.active {
+    background-color: rgba(31, 111, 235, 0.28);
+    color: #eef5ff;
+  }
+
+  .jobcan-enhanced body.dark-mode .nav-item.has-submenu > ul,
+  .jobcan-enhanced body.dark-mode .menu-item.has-children > ul {
+    background-color: transparent !important;
+  }
+
+  .jobcan-enhanced body.dark-mode .nav-item.has-submenu > ul > li > a,
+  .jobcan-enhanced body.dark-mode .menu-item.has-children > ul > li > a {
+    color: #d2d9e2 !important;
+  }
+
+  .jobcan-enhanced body.dark-mode .nav-item.has-submenu > ul > li > a:hover,
+  .jobcan-enhanced body.dark-mode .menu-item.has-children > ul > li > a:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #f5f7fb !important;
+  }
+
+  .jobcan-enhanced body.dark-mode .nav-item.has-submenu > ul > li > a.active,
+  .jobcan-enhanced body.dark-mode .menu-item.has-children > ul > li > a.active,
+  .jobcan-enhanced body.dark-mode .sidemenu a.selected,
+  .jobcan-enhanced body.dark-mode .menu-item.selected > a,
+  .jobcan-enhanced body.dark-mode .nav-item.selected > a {
+    background-color: rgba(31, 111, 235, 0.26) !important;
+    color: #eef5ff !important;
+  }
+  
+  /* Selected menu item styling */
+  .jobcan-enhanced .sidemenu a.selected,
+  .jobcan-enhanced .menu-item.selected > a,
+  .jobcan-enhanced .nav-item.selected > a {
+    background-color: var(--color-primary-light) !important;
+    color: var(--color-primary) !important;
+    font-weight: 500 !important;
+    border-radius: var(--border-radius-none) !important;
+    margin: 0 !important;
+  }
+  
+  /* ==========================================================================
+     4. Cards & Containers
+     ========================================================================== */
+  .jobcan-enhanced .card,
+  .jobcan-enhanced .box,
+  .jobcan-enhanced .box-default,
+  .jobcan-enhanced .panel {
+    background-color: var(--color-background);
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 2px 5px var(--color-black-10);
+    margin-bottom: 16px;
+    border: 1px solid var(--color-border);
+    overflow: hidden; /* Add this line to clip child content */
+  }
+  
+  .jobcan-enhanced .card-text {
+    margin-top: 1rem;
+  }
+  
+  .jobcan-enhanced .card-header,
+  .jobcan-enhanced .box-header,
+  .jobcan-enhanced .panel-header {
+    padding: 12px;
+    background-color: var(--color-gray-100);
+    border-bottom: 1px solid var(--color-gray-200);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--color-secondary);
+    border-radius: var(--border-radius-md) var(--border-radius-md) var(--border-radius-none) var(--border-radius-none);
+    
+  }
+  
+  .jobcan-enhanced .card-body,
+  .jobcan-enhanced .box-body,
+  .jobcan-enhanced .panel-body {
+    padding: 16px;
+    background-color: var(--color-card);
+  }
+  
+  .jobcan-enhanced .card-footer,
+  .jobcan-enhanced .box-footer,
+  .jobcan-enhanced .panel-footer {
+    padding: 16px;
+    background-color: var(--color-gray-100);
+    border-top: 1px solid var(--color-gray-200);
+    border-radius:  0 0 var(--border-radius-md) var(--border-radius-md) !important;
+  }
+  
+  /* External panel misc toggle */
+  .jobcan-enhanced .external-panel-wrapper {
+    position: relative;
+    margin-bottom: 15px;
+    display: inline-block;
+  }
+  
+  .jobcan-enhanced .external-panel-toggle {
+    padding: 8px 12px;
+    background-color: var(--color-gray-100);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--color-secondary);
+    text-align: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px var(--color-black-8);
+    position: relative;
+    display: inline-block;
+    white-space: nowrap;
+  }
+  
+  .jobcan-enhanced .external-panel-toggle::after {
+    content: '';
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 6px;
+    vertical-align: middle;
+    border-bottom: 4px solid; /* Changed from border-top to border-bottom */
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+    transition: transform 0.2s ease;
+  }
+  
+  .jobcan-enhanced .external-panel-toggle.active::after {
+    transform: rotate(180deg);
+  }
+  
+  .jobcan-enhanced .external-panel-toggle:hover {
+    background-color: var(--color-gray-200);
+    box-shadow: 0 3px 8px var(--color-black-12);
+  }
+  
+  .jobcan-enhanced .external-panel-misc {
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--border-radius-md);
+    background-color: var(--color-white);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+    animation: fadeIn 0.2s ease-in-out;
+    z-index: var(--z-index-dropdown);
+    padding: 15px;
+    min-width: 250px;
+    transform-origin: bottom center;
+    position: relative;
+    --arrow-position: 20px;
+  }
+  
+  .jobcan-enhanced .external-panel-misc::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: var(--arrow-position);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid var(--color-white);
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+  }
+  
+  .jobcan-enhanced .external-panel-misc::before {
+    content: '';
+    position: absolute;
+    bottom: -9px;
+    left: var(--arrow-position);
+    width: 0;
+    height: 0;
+    border-left: 9px solid transparent;
+    border-right: 9px solid transparent;
+    border-top: 9px solid var(--color-gray-200);
+  }
+  
+  /* Style for when the panel is positioned below the button */
+  .jobcan-enhanced .external-panel-misc.position-below {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .jobcan-enhanced .external-panel-misc.position-below::after {
+    bottom: auto;
+    top: -8px;
+    border-top: none;
+    border-bottom: 8px solid var(--color-white);
+  }
+  
+  .jobcan-enhanced .external-panel-misc.position-below::before {
+    bottom: auto;
+    top: -9px;
+    border-top: none;
+    border-bottom: 9px solid var(--color-gray-200);
+  }
+  
+  .jobcan-enhanced .external-panel-misc a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: block;
+    padding: 5px 0;
+  }
+  
+  .jobcan-enhanced .external-panel-misc a:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+  }
+  
+  /* Charts and graphs */
+  .jobcan-enhanced .chart-container {
+    padding: 16px;
+    background-color: var(--color-card);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+  
+  /* Enhanced collapseInfo section */
+  .jobcan-enhanced #collapseInfo {
+    margin-top: 20px;
+  }
+  
+  .jobcan-enhanced #collapseInfo .card,
+  .jobcan-enhanced #collapseInfo .jbc-card,
+  .jobcan-enhanced #collapseInfo .compact-card {
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px var(--color-black-8);
+    transition: all 0.2s ease;
+    will-change: transform, box-shadow;
+  }
+  
+  .jobcan-enhanced #collapseInfo .card:hover,
+  .jobcan-enhanced #collapseInfo .jbc-card:hover,
+  .jobcan-enhanced #collapseInfo .compact-card:hover {
+    box-shadow: 0 4px 12px var(--color-black-12);
+  }
+  
+  .jobcan-enhanced #collapseInfo .card-header,
+  .jobcan-enhanced #collapseInfo .jbc-card-header {
+    padding: 12px;
+    background-color: var(--color-gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: var(--border-radius-md) var(--border-radius-md) var(--border-radius-none) var(--border-radius-none);
+  }
+  
+  .jobcan-enhanced #collapseInfo .card-header h5,
+  .jobcan-enhanced #collapseInfo .jbc-card-header h5 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: var(--border-radius-md) var(--border-radius-md) var(--border-radius-none) var(--border-radius-none);
+  }
+  
+  .jobcan-enhanced #collapseInfo .card-body,
+  .jobcan-enhanced #collapseInfo .jbc-card-body {
+    padding: 0;
+  }
+  
+  .jobcan-enhanced #collapseInfo table {
+    margin-bottom: 0;
+  }
+  
+  .jobcan-enhanced #collapseInfo th {
+    width: 140px;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: normal;
+    color: var(--color-gray-600);
+    background-color: var(--color-gray-100);
+  }
+  
+  .jobcan-enhanced #collapseInfo td {
+    padding: 10px;
+    font-size: 13px;
+  }
+  
+  /* Consolidated toggle-zero-values-btn styles */
+  .jobcan-enhanced .toggle-zero-values-btn {
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-6);
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+    white-space: nowrap;
+  }
+  
+  .jobcan-enhanced .toggle-zero-values-btn:hover {
+    background-color: var(--color-primary-light);
+    color: var(--color-white);
+    border-color: var(--color-primary);
+  }
+  
+  .jobcan-enhanced .toggle-zero-values-btn.showing {
+    background-color: var(--color-primary-light);
+    color: var(--color-white);
+  }
+  
+  /* Progress bars */
+  .jobcan-enhanced .progress {
+    height: 8px;
+    background-color: var(--color-gray-200);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  
+  .jobcan-enhanced .progress-bar {
+    background-color: var(--color-primary);
+    height: 100%;
+    border-radius: var(--border-radius-sm);
+    will-change: width;
+  }
+  
+  /* Badges and status indicators */
+  .jobcan-enhanced .badge,
+  .jobcan-enhanced .status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-lg);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .jobcan-enhanced .badge-primary,
+  .jobcan-enhanced .status-active {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+  
+  .jobcan-enhanced .badge-success,
+  .jobcan-enhanced .status-approved {
+    background-color: var(--color-success-bg-light);
+    color: var(--color-success);
+  }
+  
+  .jobcan-enhanced .badge-warning,
+  .jobcan-enhanced .status-pending {
+    background-color: var(--color-warning-bg-light);
+    color: var(--color-warning);
+  }
+  
+  .jobcan-enhanced .badge-danger,
+  .jobcan-enhanced .status-rejected {
+    background-color: var(--color-danger-bg-light);
+    color: var(--color-danger);
+  }
+  
+  /* Time display on the main punch screen */
+  .jobcan-enhanced .contentsArea h1 {
+    font-size: 72px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--color-secondary);
+    font-family: 'Roboto', 'Arial', sans-serif;
+    margin: 32px 0 40px;
+  }
+  
+  /* ==========================================================================
+     5. Form Elements
+     ========================================================================== */
+  .jobcan-enhanced input[type="text"],
+  .jobcan-enhanced input[type="password"],
+  .jobcan-enhanced input[type="email"],
+  .jobcan-enhanced input[type="number"],
+  .jobcan-enhanced input[type="date"],
+  .jobcan-enhanced select,
+  .jobcan-enhanced textarea {
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    padding: 8px 12px;
+    font-size: 14px;
+    transition: var(--transition);
+    width: 100%;
+    background-color: var(--color-white);
+    color: var(--color-text-primary);
+    box-sizing: border-box;
+  }
+  
+  .jobcan-enhanced .custom-select {
+    display: inline-block;
+    width: 100%;
+    height: calc(2em + .75rem + 2px);
+    padding: .375rem 1.75rem .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1;
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    transition: var(--transition);
+  }
+  
+  .jobcan-enhanced input:focus,
+  .jobcan-enhanced select:focus,
+  .jobcan-enhanced textarea:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+    outline: none;
+  }
+  
+  /* Radio button styling */
+  /* Used for both standard radio buttons and mode toggle options */
+  .jobcan-enhanced .radio-inline {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 16px;
+    cursor: pointer;
+  }
+
+  .jobcan-enhanced input[type="radio"] {
+    margin-right: 8px;
+  }
+  
+  /* ==========================================================================
+     6. Buttons
+     ========================================================================== */
+  .jobcan-enhanced .btn,
+  .jobcan-enhanced :where(button),
+  .jobcan-enhanced :where(input[type="button"]),
+  .jobcan-enhanced :where(input[type="submit"]) {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    font-weight: 500;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 14px;
+    border-width: initial;
+    border-style: none;
+    border-color: initial;
+    border-image: initial;
+    border-radius: var(--border-radius-md);
+    padding: 8px 16px;
+    transition: var(--transition);
+    will-change: transform, box-shadow;
+  }
+  
+  .jobcan-enhanced .btn:hover,
+  .jobcan-enhanced :where(button:hover),
+  .jobcan-enhanced :where(input[type="button"]:hover),
+  .jobcan-enhanced :where(input[type="submit"]:hover) {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-primary-hover);
+  }
+  
+  /* Small buttons with white background */
+  .jobcan-enhanced .btn-sm,
+  .jobcan-enhanced :where(button.small),
+  .jobcan-enhanced .small-btn,
+  .jobcan-enhanced .btn-mini,
+  .jobcan-enhanced :where(button.mini),
+  .jobcan-enhanced .mini-btn,
+  .jobcan-enhanced :where(td button),
+  .jobcan-enhanced td .btn,
+  .jobcan-enhanced .btn-secondary {
+    background-color: var(--color-white);
+    color: var(--color-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-6);
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    text-transform: none;
+    box-shadow: var(--shadow-button-sm);
+  }
+  
+  .jobcan-enhanced .btn-sm:hover,
+  .jobcan-enhanced :where(button.small:hover),
+  .jobcan-enhanced .small-btn:hover,
+  .jobcan-enhanced .btn-mini:hover,
+  .jobcan-enhanced :where(button.mini:hover),
+  .jobcan-enhanced .mini-btn:hover,
+  .jobcan-enhanced :where(td button:hover),
+  .jobcan-enhanced td .btn:hover,
+  .jobcan-enhanced .btn-secondary:hover {
+    background-color: var(--color-white);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-button-sm-hover);
+    border-color: var(--color-primary);
+  }
+  
+  /* Icon-only small buttons */
+  .jobcan-enhanced .btn-icon,
+  .jobcan-enhanced :where(button.icon),
+  .jobcan-enhanced .icon-btn {
+    background-color: var(--color-white);
+    color: var(--color-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-6);
+    padding: 6px;
+    min-width: 32px;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-button-sm);
+  }
+  
+  .jobcan-enhanced .btn-icon:hover,
+  .jobcan-enhanced :where(button.icon:hover),
+  .jobcan-enhanced .icon-btn:hover {
+    background-color: var(--color-gray-100);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-button-sm-hover);
+    border-color: var(--color-primary);
+  }
+  
+  .jobcan-enhanced .btn-secondary,
+  .jobcan-enhanced :where(button.secondary) {
+    background-color: var(--color-white);
+    color: var(--color-secondary);
+  }
+  
+  .jobcan-enhanced .btn-secondary:hover,
+  .jobcan-enhanced :where(button.secondary:hover) {
+    background-color: var(--color-gray-100);
+    box-shadow: var(--shadow-button-sm-hover);
+    border-color: var(--color-secondary);
+  }
+  
+  /* Push button styling */
+  .jobcan-enhanced input[value="PUSH"] {
+    font-size: 18px;
+    font-weight: 600;
+    padding: 16px 48px;
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+    display: block;
+  }
+  
+  /* Form screenshot button */
+  .jobcan-enhanced .form-screenshot-btn {
+    padding: 9px 16px;
+    border-radius: var(--border-radius-md);
+    font-size: 0.85rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background-color: var(--color-gray-150);
+    color: var(--color-gray-600);
+    border: 1px solid var(--color-gray-300);
+  }
+  
+  .jobcan-enhanced .form-screenshot-btn:hover {
+    background-color: var(--color-gray-200);
+    box-shadow: 0 1px 2px var(--color-black-10);
+  }
+  
+  .jobcan-enhanced .form-screenshot-btn svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 2px;
+  }
+  
+  /* ==========================================================================
+     7. Tables
+     ========================================================================== */
+  .jobcan-enhanced table,
+  .jobcan-enhanced .table,
+  .jobcan-enhanced .jbc-table {
+    width: 100%;
+    border-collapse: collapse !important; /* Changed from separate to collapse */
+    border-spacing: 0;
+    background-color: var(--color-card);
+    box-shadow: var(--shadow-sm);
+    font-size: 12px;
+    border: none; /* Removed border from here */
+    border-radius: var(--border-radius-md); /* Keep for overflow handling */
+    overflow: hidden;
+    margin-bottom: 0;
+  }
+  
+  .jobcan-enhanced .table-responsive {
+    border-radius: var(--border-radius-md);
+    background-color: var(--color-card);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 0;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border); /* Added border here instead */
+  }
+
+  /* Table header styling */
+  .jobcan-enhanced th,
+  .jobcan-enhanced .table th,
+  .jobcan-enhanced .jbc-table th,
+  .jobcan-enhanced .jbc-table-header {
+    background-color: var(--color-gray-100);
+    color: var(--color-secondary);
+    font-weight: 600;
+    text-align: center;
+    padding: 8px !important;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-index-sticky-header);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 !important;
+  }
+
+  /* Table cell styling */
+  .jobcan-enhanced td,
+  .jobcan-enhanced .table td,
+  .jobcan-enhanced .jbc-table td {
+    padding: 8px !important;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    vertical-align: middle;
+    line-height: 1.2;
+    transition: background-color 0.2s ease;
+    margin: 0 !important;
+  }
+
+  /* Table row hover effect */
+  .jobcan-enhanced tr:not(.no-hover):hover td {
+    background-color: var(--color-table-hover-bg);
+  }
+
+  /* Zebra striping for better readability */
+  .jobcan-enhanced tr:nth-child(even) td {
+    background-color: var(--color-table-stripe-bg);
+  }
+
+  /* Table row status variants with improved colors */
+  .jobcan-enhanced .table tr.success td,
+  .jobcan-enhanced .jbc-table tr.success td {
+    background-color: var(--color-success-bg-light);
+    border-bottom-color: var(--color-success-border);
+  }
+  
+  .jobcan-enhanced .table tr.warning td,
+  .jobcan-enhanced .jbc-table tr.warning td {
+    background-color: var(--color-warning-bg-light);
+    border-bottom-color: var(--color-warning-border);
+  }
+  
+  .jobcan-enhanced .table tr.danger td,
+  .jobcan-enhanced .jbc-table tr.danger td {
+    background-color: var(--color-danger-bg-light);
+    border-bottom-color: var(--color-danger-border);
+  }
+
+  /* Status row hover effects */
+  .jobcan-enhanced .table tr.success:hover td,
+  .jobcan-enhanced .jbc-table tr.success:hover td {
+    background-color: var(--color-success-bg);
+  }
+  
+  .jobcan-enhanced .table tr.warning:hover td,
+  .jobcan-enhanced .jbc-table tr.warning:hover td {
+    background-color: var(--color-warning-bg);
+  }
+  
+  .jobcan-enhanced .table tr.danger:hover td,
+  .jobcan-enhanced .jbc-table tr.danger:hover td {
+    background-color: rgba(231, 76, 60, 0.12);
+  }
+
+  /* Table cell alignment with improved spacing */
+  .jobcan-enhanced .table .text-center,
+  .jobcan-enhanced .jbc-table .text-center {
+    text-align: center;
+  }
+  
+  .jobcan-enhanced .table .text-right,
+  .jobcan-enhanced .jbc-table .text-right {
+    text-align: right;
+    padding-right: 24px;
+  }
+
+  /* Links in tables with improved interaction */
+  .jobcan-enhanced .table a,
+  .jobcan-enhanced .jbc-table a,
+  .jobcan-enhanced .jbc-text-reset {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-sm);
+  }
+  
+  .jobcan-enhanced .table a:hover,
+  .jobcan-enhanced .jbc-table a:hover,
+  .jobcan-enhanced .jbc-text-reset:hover {
+    color: var(--color-primary);
+    background-color: var(--color-primary-light);
+    text-decoration: none;
+  }
+
+  /* Time table specific styling */
+  .jobcan-enhanced #time-table,
+  .jobcan-enhanced .time-table {
+    margin-top: 12px;
+    background-color: var(--color-card);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border); /* Add border here */
+  }
+  
+  .jobcan-enhanced #time-table table,
+  .jobcan-enhanced .time-table table {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    border: none; /* Ensure no border on inner table */
+  }
+  
+  .jobcan-enhanced #time-table th,
+  .jobcan-enhanced .time-table th {
+    background-color: var(--color-gray-100);
+    color: var(--color-secondary);
+    font-weight: 600;
+    padding: 8px !important;
+    width: 200px;
+    text-align: left;
+    border-right: 1px solid var(--color-border);
+    white-space: nowrap;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 !important;
+  }
+  
+  .jobcan-enhanced #time-table td,
+  .jobcan-enhanced .time-table td {
+    padding: 8px !important;
+    margin: 0 !important;
+    line-height: 1.2;
+  }
+
+  /* Highlight time information with improved visibility */
+  .jobcan-enhanced #time-table tr:nth-child(4) td,
+  .jobcan-enhanced .time-table tr:nth-child(4) td {
+    color: var(--color-primary);
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  /* Status text styling */
+  .jobcan-enhanced #time-table .jbc-text-sub,
+  .jobcan-enhanced .time-table .jbc-text-sub {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    display: block;
+  }
+
+  /* Empty cell styling */
+  .jobcan-enhanced td:empty {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--color-black-2),
+      var(--color-black-2) 10px,
+      var(--color-black-5) 10px,
+      var(--color-black-5) 20px
+    );
+  }
+
+  /* Pagination styling */
+  .jobcan-enhanced .pagination {
+    display: flex;
+    padding: 0;
+    list-style: none;
+    border-radius: var(--border-radius-md);
+    margin: 24px 0;
+    justify-content: center;
+    gap: 4px;
+  }
+  
+  .jobcan-enhanced .pagination .page-item {
+    margin: 0;
+  }
+  
+  .jobcan-enhanced .pagination .page-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 12px;
+    margin: 0;
+    line-height: 1;
+    color: var(--color-secondary);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-6);
+    transition: all 0.2s ease;
+    font-weight: 500;
+    font-size: 14px;
+  }
+  
+  .jobcan-enhanced .pagination .page-link:hover {
+    z-index: var(--z-index-sticky-header);
+    color: var(--color-primary);
+    background-color: var(--color-primary-light);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+  }
+  
+  .jobcan-enhanced .pagination .page-item.active .page-link {
+    z-index: var(--z-index-pagination-active);
+    color: var(--color-white);
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .jobcan-enhanced .pagination .page-item.disabled .page-link {
+    color: var(--color-text-disabled);
+    background-color: var(--color-gray-100);
+    border-color: var(--color-border);
+    cursor: not-allowed;
+  }
+
+    .jobcan-enhanced .jbc-table td {
+      padding: 12px;
+      font-size: 13px;
+    }
+
+    .jobcan-enhanced th,
+    .jobcan-enhanced .table th,
+    .jobcan-enhanced .jbc-table th {
+      padding: 12px;
+      font-size: 12px;
+  }
+  
+  /* ==========================================================================
+     8. Custom Select & Dropdown
+     ========================================================================== */
+  /* Custom select dropdown styling */
+  .jobcan-enhanced .custom-select-wrapper {
+    padding: 10px 16px;
+    border-radius: var(--border-radius-md) !important;
+  }
+
+  .jobcan-enhanced .custom-select-wrapper:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-gray-150);
+  }
+  
+  .jobcan-enhanced .project-select {
+    max-width: 220px;
+  }
+  
+  .jobcan-enhanced .task-select {
+    max-width: 110px;
+  }
+  
+  .jobcan-enhanced .select-display {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 13px;
+    color: var(--color-text-primary);
+    text-align: left;
+    padding-right: 8px;
+  }
+  
+  .jobcan-enhanced .select-display.placeholder {
+    color: var(--color-gray-550);
+    font-style: italic;
+  }
+  
+  .jobcan-enhanced .dropdown-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    color: var(--color-gray-650);
+  }
+  
+  /* Sidepanel for select options */
+  .jobcan-enhanced .select-sidepanel {
+    position: fixed;
+    top: 0px;
+    width: 400px;
+    height: 100vh;
+    background-color: var(--color-white);
+    box-shadow: 0 0 20px var(--color-black-20);
+    z-index: var(--z-index-modal);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(30%);
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    will-change: transform;
+  }
+  
+  /* Tabs for filtering options */
+  .jobcan-enhanced .tabs-container {
+    display: flex;
+    overflow-x: auto;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--color-gray-250);
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    background-color: var(--color-gray-100);
+  }
+  
+  .jobcan-enhanced .tabs-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  .jobcan-enhanced .tab {
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 400;
+    white-space: nowrap;
+    color: var(--color-gray-650);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    margin-right: 6px;
+  }
+  
+  .jobcan-enhanced .tab:hover {
+    color: var(--color-primary);
+  }
+  
+  .jobcan-enhanced .tab.active {
+    color: var(--color-primary);
+    font-weight: 500;
+    border-bottom: 2px solid var(--color-primary);
+  }
+  
+  .jobcan-enhanced .select-sidepanel.open {
+    transform: translateX(0);
+  }
+  
+  .jobcan-enhanced .sidepanel-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--color-gray-250);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+  
+  .jobcan-enhanced .sidepanel-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-secondary);
+  }
+  
+  .jobcan-enhanced .options-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 0;
+  }
+  
+  .jobcan-enhanced .options-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: calc(100vh - 70px);
+  }
+  
+  .jobcan-enhanced .option-item {
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--color-text-primary);
+    padding: 8px;
+    border-left: 3px solid transparent;
+    transition: background-color 0.2s, border-left-color 0.2s;
+    position: relative; /* Add relative positioning */
+  }
+  
+  .jobcan-enhanced .option-item:hover {
+    background-color: var(--color-primary-hover-bg);
+    border-left-color: var(--color-primary-border-light);
+  }
+  
+  .jobcan-enhanced .option-item.selected {
+    background-color: var(--color-primary-active-bg);
+    border-left-color: var(--color-primary);
+    font-weight: 500;
+    color: var(--color-primary);
+  }
+  
+  .jobcan-enhanced .option-item.keyboard-focused {
+    background-color: #f0f7ff;
+    border-left-color: #7fb5ff;
+    position: relative;
+    outline: none;
+  }
+  
+  .jobcan-enhanced .option-item.keyboard-focused:after {
+    content: '';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: var(--border-radius-circle);
+    background-color: var(--color-primary);
+  }
+  
+  .jobcan-enhanced .no-options {
+    padding: 16px;
+    color: var(--color-gray-550);
+    font-style: italic;
+    text-align: center;
+  }
+  
+  .jobcan-enhanced .sidepanel-close {
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    border-radius: var(--border-radius-circle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--color-gray-650);
+    padding: 0;
+    transition: all 0.2s ease;
+  }
+  
+  .jobcan-enhanced .sidepanel-close:hover {
+    background-color: var(--color-gray-150);
+    color: var(--color-text-primary);
+  }
+  
+  /* Add styles for the copy button */
+  .jobcan-enhanced .copy-option-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none; /* Hidden by default */
+    padding: 2px 6px;
+    font-size: 10px;
+    background-color: var(--color-white);
+    color: var(--color-gray-700);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    z-index: var(--z-index-sticky-header);
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .jobcan-enhanced .copy-option-btn:hover {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-800);
+  }
+
+  /* Show button on option item hover */
+  .jobcan-enhanced .option-item:hover .copy-option-btn {
+    display: inline-block;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  /* ==========================================================================
+     9. Modals & Overlays
+     ========================================================================== */
+  /* Convert modal to side panel */
+  .jobcan-enhanced #man-hour-manage-modal {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: auto !important;
+    width: 550px !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: var(--border-radius-lg) 0 0 var(--border-radius-lg) !important;
+    z-index: var(--z-index-popover) !important;
+    overflow-y: auto !important;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15) !important;
+    will-change: transform;
+  }
+  
+  .jobcan-enhanced #man-hour-manage-modal.show {
+    transform: translateX(0);
+  }
+  
+  .jobcan-enhanced #man-hour-manage-modal .modal-dialog {
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: var(--border-radius-lg) 0 0 var(--border-radius-lg) !important;
+    padding: 0 !important;
+  }
+  
+  .jobcan-enhanced #man-hour-manage-modal .modal-content {
+    height: 100% !important;
+    border-radius: var(--border-radius-10) 0 0 var(--border-radius-10) !important;
+    border: none !important;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background-color: var(--color-card) !important;
+  }
+  
+  .jobcan-enhanced #man-hour-manage-modal .modal-header {
+    padding: 12px 20px !important;
+    min-height: 60px !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    position: sticky !important;
+    top: 0 !important;
+    background-color: white !important;
+    z-index: var(--z-index-sidemenu) !important;
+  }
+  
+  .jobcan-enhanced #man-hour-manage-modal .close,
+  .jobcan-enhanced #man-hour-manage-modal button.close {
+    opacity: 1 !important;
+    color: var(--color-secondary) !important;
+    font-size: 24px !important;
+    font-weight: normal !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    background-color: transparent !important;
+    transition: background-color 0.2s !important;
+    cursor: pointer !important;
+    float: none !important;
+    line-height: 1 !important;
+    border: 0 !important;
+    appearance: none;
+  }
+
+  .jobcan-enhanced #man-hour-manage-modal .close > span,
+  .jobcan-enhanced #man-hour-manage-modal button.close > span {
+    display: block;
+    line-height: 1;
+    transform: translateY(-3px);
+  }
+  
+  .jobcan-enhanced #man-hour-manage-modal .close:hover,
+  .jobcan-enhanced #man-hour-manage-modal button.close:hover {
+    background-color: var(--color-primary-hover-bg);
+  }
+  
+  .jobcan-enhanced #man-hour-manage-modal .modal-body {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    padding: 16px !important;
+    max-height: calc(100vh - 60px - 70px) !important; /* Adjust based on header and footer heights */
+  }
+  
+  .jobcan-enhanced #man-hour-manage-modal .modal-footer,
+  .jobcan-enhanced #man-hour-manage-modal .jbc-modal-footer {
+    padding: 12px 16px !important;
+    border-top: 1px solid var(--color-border) !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    background-color: white !important;
+    z-index: var(--z-index-sidemenu) !important;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05) !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+  }
+  
+  /* Hide modal backdrop and adjust layout when modal is visible */
+  .jobcan-enhanced .modal-backdrop.fade.show {
+    display: none !important;
+    opacity: 0 !important;
+  }
+  
+  /* Add date selector navigation to modal header */
+  .jobcan-enhanced #man-hour-manage-modal .date-selector {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  
+  /* Hide progress-box in the modal */
+  .jobcan-enhanced #progress-box,
+  .jobcan-enhanced #man-hour-manage-modal #progress-box {
+    display: none !important;
+  }
+  
+  .jobcan-enhanced #man-hour-manage-modal .date-selector .date-nav-btn {
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    padding: 4px 8px;
+    cursor: pointer;
+    color: var(--color-primary);
+    margin: 0 4px;
+  }
+  
+  .jobcan-enhanced #man-hour-manage-modal .date-selector .date-nav-btn:hover {
+    background-color: var(--color-primary-light);
+  }
+  
+  /* Enhanced Modal Title Styling */
+  .jobcan-enhanced .enhanced-title-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-right: auto;
+  }
+  
+  .jobcan-enhanced .enhanced-title-time {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--color-secondary);
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+  
+  .jobcan-enhanced .enhanced-title-date {
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    font-weight: normal;
+  }
+  
+  /* Man hour sum display styling */
+  .jobcan-enhanced .time-sum-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .jobcan-enhanced .man-hour-sum {
+    font-size: 14px;
+    margin-left: 8px;
+    color: var(--color-text-secondary);
+    font-weight: normal;
+    opacity: 0.85;
+    padding: 2px 6px;
+    border-radius: var(--border-radius-sm);
+    background-color: var(--color-black-3);
+    transition: all 0.2s ease;
+  }
+  
+  .jobcan-enhanced .man-hour-sum:hover {
+    opacity: 1;
+    background-color: var(--color-black-5);
+  }
+  
+  /* Man hour difference display styling with specific styles for shortage and excess */
+  .jobcan-enhanced .man-hour-diff {
+    font-size: 12px;
+    margin-left: 4px;
+    font-weight: normal;
+    padding: 1px 5px;
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s ease;
+    margin-top: 4px;
+    display: inline-block;
+  }
+  
+  /* Style for shortage (not enough hours) */
+  .jobcan-enhanced .man-hour-diff.shortage {
+    color: var(--color-danger);
+    background-color: var(--color-danger-light);
+    border-left: 2px solid var(--color-danger);
+    animation: pulse-danger 2s infinite;
+    /* Use transform for better performance */
+    transform: translateZ(0);
+  }
+  
+  /* Style for excess (too many hours) */
+  .jobcan-enhanced .man-hour-diff.excess {
+    color: var(--color-orange);
+    background-color: var(--color-orange-light);
+    border-left: 2px solid var(--color-orange);
+    animation: pulse-warning 2s infinite;
+    /* Use transform for better performance */
+    transform: translateZ(0);
+  }
+  
+  @keyframes pulse-warning {
+    0% {
+      opacity: 0.7;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes pulse-danger {
+    0% {
+      opacity: 0.7;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.7;
+    }
+  }
+
+  /* Man hour modal table improvements */
+  .jobcan-enhanced #man-hour-manage-modal .table,
+  .jobcan-enhanced #man-hour-manage-modal .jbc-table {
+    margin: 0 !important;
+  }
+  
+  .jobcan-enhanced #man-hour-manage-modal .jbc-table th:first-child,
+  .jobcan-enhanced #man-hour-manage-modal .jbc-table td:first-child {
+    display: none !important;
+  }
+  
+  .jobcan-enhanced #man-hour-manage-modal .jbc-table input,
+  .jobcan-enhanced #man-hour-manage-modal .jbc-table select,
+  .jobcan-enhanced #man-hour-manage-modal .table input,
+  .jobcan-enhanced #man-hour-manage-modal .table select {
+    padding: 6px 8px !important;
+    margin: 2px !important;
+  }
+  
+  .jobcan-enhanced #man-hour-manage-modal .jbc-table input:focus,
+  .jobcan-enhanced #man-hour-manage-modal .jbc-table select:focus,
+  .jobcan-enhanced #man-hour-manage-modal .table input:focus,
+  .jobcan-enhanced #man-hour-manage-modal .table select:focus {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 2px var(--shadow-primary) !important;
+    outline: none !important;
+  }
+  
+  /* ==========================================================================
+     10. Flip Clock
+     ========================================================================== */
+  /* Flip Clock Container */
+  .jobcan-enhanced .flip-clock-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: var(--spacing-lg) 0;
+    padding: var(--spacing-md);
+    background-color: var(--color-surface, #ffffff);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    /* Remove will-change from container - only apply to animating elements */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Add containment for better performance */
+    contain: layout style;
+  }
+
+  /* Clock digits container */
+  .jobcan-enhanced .flip-clock-digits-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Add containment */
+    contain: layout style;
+  }
+  
+  /* Digits */
+  .jobcan-enhanced .flip-clock-digit {
+    position: relative;
+    width: 80px;
+    height: 120px;
+    margin: 0 4px;
+    perspective: 800px;
+    /* Add containment for digit elements */
+    contain: layout style paint;
+  }
+  
+  /* Hide original clock */
+  .jobcan-enhanced #clock,
+  .jobcan-enhanced #display-time,
+  .jobcan-enhanced .display-2 > div:not(.flip-clock-container) {
+    display: none;
+  }
+  
+  .jobcan-enhanced .display-2 {
+    font-weight: 600;
+  }
+  
+  /* Self-animating digits - optimized for performance */
+  .jobcan-enhanced .flip-clock-digit.self-animating {
+    transform-style: preserve-3d;
+    /* Add containment */
+    contain: layout style;
+  }
+  
+  
+  .jobcan-enhanced .colon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    width: 30px;
+    height: 120px;
+    color: var(--color-primary);
+    font-weight: bold;
+    /* Add containment as size doesn't change */
+    contain: layout style paint;
+    /* Optimize colon animation */
+    animation: colonPulseOptimized 2s infinite;
+  }
+  
+  .jobcan-enhanced .flip-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    /* Remove transition - handled by JavaScript animation */
+    /* Add containment */
+    contain: layout style;
+    /* Force GPU acceleration */
+    transform: translateZ(0);
+  }
+  
+  .jobcan-enhanced .flip-card-front,
+  .jobcan-enhanced .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+    color: var(--color-text-on-primary);
+    font-size: 3rem;
+    font-weight: 700;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    /* Add containment */
+    contain: layout style paint;
+    /* Force GPU layer */
+    transform: translateZ(0);
+  }
+  
+  .jobcan-enhanced .flip-card-back {
+    transform: rotateX(180deg) translateZ(0);
+  }
+  
+  /* Clock style variations */
+  .jobcan-enhanced .flip-clock-digit.style-gradient .flip-card-front,
+  .jobcan-enhanced .flip-clock-digit.style-gradient .flip-card-back {
+    background: linear-gradient(135deg, var(--color-primary-dark, #0055b3) 0%, var(--color-primary, #0078ff) 100%);
+  }
+  
+  .jobcan-enhanced .flip-clock-digit.style-working .flip-card-front,
+  .jobcan-enhanced .flip-clock-digit.style-working .flip-card-back {
+    background: linear-gradient(135deg, var(--color-clock-working-start) 0%, var(--color-clock-working-end) 100%);
+  }
+  
+  .jobcan-enhanced .flip-clock-digit.style-not-working .flip-card-front,
+  .jobcan-enhanced .flip-clock-digit.style-not-working .flip-card-back {
+    background: linear-gradient(135deg, var(--color-clock-not-working-start) 0%, var(--color-clock-not-working-end) 100%);
+  }
+  
+  /* Colon style variations */
+  .jobcan-enhanced .colon.colon-default {
+    color: var(--color-primary);
+  }
+  
+  .jobcan-enhanced .colon.colon-working {
+    color: var(--color-clock-colon-working);
+  }
+  
+  .jobcan-enhanced .colon.colon-not-working {
+    color: var(--color-clock-colon-not-working);
+  }
+  
+  /* Settings menu styles */
+  .jobcan-enhanced .flip-clock-settings-menu {
+    font-size: 14px;
+  }
+  
+  /* Work progress elements with improved performance */
+  .jobcan-enhanced .work-progress-container {
+    width: auto;
+    max-width: none;
+    margin-top: 16px;
+    position: relative;
+    min-height: 60px;
+    border-radius: 16px;
+    padding: 10px 12px 8px;
+    background: linear-gradient(180deg, #f9fafb 0%, #f1f3f5 100%);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .jobcan-enhanced .work-progress-container:hover {
+    border-color: rgba(0, 102, 221, 0.25);
+    box-shadow: 0 3px 10px rgba(16, 24, 40, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  }
+  
+  .jobcan-enhanced .work-progress-container.hidden {
+    display: none;
+  }
+  
+  .jobcan-enhanced .work-progress-track {
+    height: 14px;
+    width: 100%;
+    background-color: #d8dce1;
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.14);
+    margin-top: 0;
+  }
+  
+  .jobcan-enhanced .work-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #0f8bff 0%, #0066dd 70%, #0050b3 100%);
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: width 0.5s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15), 0 0 10px rgba(0, 102, 221, 0.25);
+    border-radius: 999px;
+  }
+  
+  /* Progress state classes */
+  .jobcan-enhanced .progress-state-inactive {
+    background-color: var(--color-gray-400);
+    box-shadow: 0 0 4px var(--color-gray-400);
+  }
+
+  .jobcan-enhanced .progress-state-starting {
+    background-color: var(--color-primary);
+    box-shadow: 0 0 4px var(--shadow-primary);
+  }
+
+  .jobcan-enhanced .progress-state-halfway {
+    background-color: var(--color-info);
+    box-shadow: 0 0 4px var(--color-info);
+  }
+
+  .jobcan-enhanced .progress-state-good {
+    background-color: var(--color-success);
+    box-shadow: 0 0 4px var(--color-success);
+  }
+
+  .jobcan-enhanced .progress-state-complete {
+    background-color: var(--color-success-dark);
+    box-shadow: 0 0 6px var(--color-success-dark);
+  }
+  
+  .jobcan-enhanced .work-progress-percentage {
+    width: 100%;
+    position: relative;
+    margin-top: 8px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 10px;
+    font-size: 12px;
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+  }
+
+  .jobcan-enhanced .work-progress-inline-label {
+    font-weight: 700;
+    color: #66717c;
+  }
+
+  .jobcan-enhanced .work-progress-inline-status {
+    font-weight: 700;
+    color: #5f6872;
+    min-width: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .jobcan-enhanced .work-progress-marker {
+    display: none;
+  }
+  
+  .jobcan-enhanced .work-progress-marker.start-marker {
+    left: 0;
+  }
+  
+  .jobcan-enhanced .work-progress-marker.end-marker {
+    right: 0;
+  }
+  
+  .jobcan-enhanced .time-scale-marker {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 14px;
+    background-color: rgba(26, 40, 58, 0.6);
+    z-index: 3;
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .jobcan-enhanced .work-punch-marker {
+    width: 10px;
+    height: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
+    cursor: pointer;
+  }
+
+  .jobcan-enhanced .work-punch-marker:hover {
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+
+  .jbe-punch-tooltip {
+    position: fixed;
+    z-index: 2147483647;
+    background: rgba(15, 23, 42, 0.94);
+    color: #f8fafc;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+  }
+
+  .jbe-punch-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .jobcan-enhanced body.dark-mode .work-progress-container {
+    background: linear-gradient(180deg, #2526282e 0%, #18191b5b 100%);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .jobcan-enhanced body.dark-mode .work-progress-track {
+    background-color: #48525f;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .jobcan-enhanced body.dark-mode .work-progress-fill {
+    background: linear-gradient(90deg, #40a9ff 0%, #1677ff 70%, #0050b3 100%);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 0 12px rgba(22, 119, 255, 0.35);
+  }
+
+  .jobcan-enhanced body.dark-mode .work-progress-inline-label {
+    color: #c7d0db;
+  }
+
+  .jobcan-enhanced body.dark-mode .work-progress-inline-status {
+    color: #e2e8f0;
+  }
+
+  .jobcan-enhanced body.dark-mode .time-scale-marker {
+    background-color: rgba(255, 255, 255, 0.45);
+    box-shadow: none;
+  }
+  
+  .jobcan-enhanced .current-time-indicator {
+    position: absolute;
+    top: 2px;
+    width: 3px;
+    height: 12px;
+    box-shadow: 0 0 4px var(--color-black-20);
+    border-radius: var(--border-radius-sm);
+    transform: translateX(-50%) translateZ(0);
+    contain: layout style paint;
+    transition: opacity 0.3s ease;
+  }
+  
+  /* Time indicator states and animations */
+  .jobcan-enhanced .current-time-indicator.near-workday {
+    opacity: 1;
+  }
+
+  .jobcan-enhanced .current-time-indicator.outside-workday {
+    opacity: 0.5;
+  }
+
+  .jobcan-enhanced .current-time-indicator.pulsing {
+    animation: time-indicator-pulse 2s infinite ease-in-out;
+  }
+
+  .jobcan-enhanced .current-time-label {
+    position: absolute;
+    top: -15px;
+    font-size: 10px;
+    font-weight: bold;
+    color: var(--color-primary-dark);
+    transform: translateX(-50%);
+    white-space: nowrap;
+    text-shadow: 0 0 2px var(--color-white-80);
+  }
+
+  @keyframes time-indicator-pulse {
+    0% { box-shadow: 0 0 4px var(--shadow-primary); }
+    50% { box-shadow: 0 0 8px var(--shadow-primary); }
+    100% { box-shadow: 0 0 4px var(--shadow-primary); }
+  }
+  
+  /* Default time display with improved performance */
+  .jobcan-enhanced .default-time-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: var(--color-primary-dark);
+    font-family: var(--font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    padding: 10px 15px;
+    border-radius: var(--border-radius-md);
+    background: linear-gradient(to bottom, var(--color-white-80), var(--color-gray-200));
+    text-shadow: 0 1px 0 var(--color-white-80);
+    box-shadow: inset 0 1px 0 var(--color-white-80), 0 2px 4px var(--color-black-10);
+    /* Add containment */
+    contain: layout style paint;
+    /* Force GPU acceleration */
+    transform: translateZ(0);
+  }
+  
+  /* ==========================================================================
+     11. Screenshot Functionality
+     ========================================================================== */
+  #jobcan-fab-menu {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    z-index: var(--z-index-preview);
+  }
+
+  .jobcan-fab-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  #jobcan-fab-menu.open .jobcan-fab-actions {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .jobcan-fab-main,
+  .jobcan-fab-action {
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: var(--border-radius-circle)!important;
+    display: flex!important;
+    align-items: center!important;
+    justify-content: center!important;
+    cursor: pointer!important;
+    color: var(--color-white)!important;
+    box-shadow: 0 2px 10px var(--color-black-20)!important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease!important;
+  }
+
+  .jobcan-fab-main {
+    background: var(--color-primary);
+  }
+
+  #jobcan-fab-menu.open .jobcan-fab-main svg {
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+  }
+
+  .jobcan-fab-action {
+    background: var(--color-secondary);
+  }
+
+  .jobcan-fab-main:hover,
+  .jobcan-fab-action:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 15px var(--color-black-30);
+  }
+
+  
+  #screenshot-capture-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px var(--color-black-30);
+  }
+  
+  #screenshot-selection-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: var(--z-index-screenshot-overlay);
+    cursor: crosshair;
+    background-color: var(--color-black-30);
+  }
+
+  .screenshot-selection-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: var(--z-index-screenshot-overlay);
+    cursor: crosshair;
+    background-color: var(--color-black-30);
+  }
+  
+  #screenshot-selection {
+    position: absolute;
+    border: 2px dashed var(--color-white);
+    background-color: rgba(66, 133, 244, 0.2);
+    box-shadow: 0 0 0 1px var(--color-white-50);
+    will-change: transform, width, height;
+  }
+
+  .screenshot-selection {
+    position: absolute;
+    border: 2px dashed var(--color-white);
+    background-color: rgba(66, 133, 244, 0.2);
+    box-shadow: 0 0 0 1px var(--color-white-50);
+    will-change: transform, width, height;
+  }
+  
+  /* Selection handles */
+  #screenshot-selection::before,
+  #screenshot-selection::after,
+  #screenshot-selection > span::before,
+  #screenshot-selection > span::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--color-white);
+    border: 1px solid var(--color-primary);
+  }
+  
+  #screenshot-selection::before { top: -5px; left: -5px; }
+  #screenshot-selection::after { top: -5px; right: -5px; }
+  #screenshot-selection > span::before { bottom: -5px; left: -5px; }
+  #screenshot-selection > span::after { bottom: -5px; right: -5px; }
+  
+  /* Screenshot notification */
+  .screenshot-notification {
+    position: fixed;
+    bottom: 24px;
+    left: 20px;
+    background-color: var(--color-notification-bg, #4285f4);
+    color: var(--color-notification-text, white);
+    padding: 10px 20px;
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-md, 0 2px 10px rgba(0,0,0,0.2));
+    z-index: var(--z-index-notification);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    animation: notification-appear 0.3s forwards;
+  }
+  
+  .screenshot-notification.hiding {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  
+  @keyframes notification-appear {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Screenshot preview */
+  #screenshot-preview-container {
+    position: fixed;
+    right: 20px;
+    z-index: var(--z-index-preview);
+    background-color: var(--color-white);
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 5px 20px var(--shadow-md);
+    padding: 10px;
+    max-width: 200px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Limit will-change to only these properties */
+    will-change: transform, opacity;
+    /* Add containment for better performance */
+    contain: layout style;
+    /* Force GPU acceleration */
+    transform: translateY(20px) translateZ(0);
+  }
+  
+  #screenshot-preview-container.open {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
+  
+  #screenshot-preview-container.closing {
+    opacity: 0;
+    transform: translateY(20px) translateZ(0);
+  }
+  
+  .screenshot-preview-image {
+    width: 100%;
+    max-height: 133px;
+    object-fit: contain;
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 0;
+    border: 1px solid var(--color-gray-200);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    /* Limit will-change to only transform */
+    will-change: transform;
+  }
+  
+  .screenshot-preview-image:hover {
+    transform: scale(1.05);
+  }
+  
+  .preview-wrapper {
+    position: relative;
+    margin-bottom: 10px;
+  }
+
+  .screenshot-preview-close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+  }
+
+  .form-screenshot-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 100;
+  }
+
+  .form-capture-btn {
+    border-radius: var(--border-radius-circle);
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .form-capture-btn:hover {
+    background-color: var(--color-gray-200);
+  }
+  
+  .preview-wrapper:hover::after {
+    content: "プレビューを確認";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--color-black-70);
+    color: var(--color-white);
+    font-size: 10px;
+    padding: 3px 6px;
+    text-align: center;
+    border-radius: var(--border-radius-none) var(--border-radius-none) var(--border-radius-sm) var(--border-radius-sm);
+  }
+  
+  .screenshot-preview-controls {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .screenshot-preview-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .screenshot-preview-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .download-btn {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+  }
+  
+  .download-btn:hover {
+    background-color: var(--color-primary-dark);
+  }
+  
+  .close-btn {
+    background-color: var(--color-gray-100);
+    color: var(--color-text-secondary);
+  }
+  
+  .close-btn:hover {
+    background-color: var(--color-gray-200);
+  }
+  
+  /* Fullsize image modal */
+  #screenshot-fullsize-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-black-85);
+    z-index: var(--z-index-notification);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    /* Limit will-change to only opacity */
+    will-change: opacity;
+    /* Add containment for better performance */
+    contain: layout style;
+  }
+  
+  #screenshot-fullsize-modal img {
+    max-width: 90%;
+    max-height: 90%;
+    border: 1px solid var(--color-white-20);
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-fullsize-image);
+  }
+  
+  #screenshot-fullsize-modal button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: transparent;
+    border: none;
+    color: var(--color-white);
+    font-size: 30px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-circle);
+    transition: background-color 0.2s ease;
+  }
+  
+  #screenshot-fullsize-modal button:hover {
+    background-color: var(--color-white-10);
+  }
+  
+  .fullsize-hint {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--color-white-50);
+    background-color: var(--color-black-50);
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: var(--border-radius-sm);
+    user-select: none;
+  }
+  
+  /* ==========================================================================
+     12. Animation Keyframes
+     ========================================================================== */
+  @property --gradient-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+  }
+  
+  @keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+
+  
+  /* Optimized flip animation with GPU acceleration */
+  @keyframes flipAnimationOptimized {
+    0% { 
+      transform: rotateX(0deg) translateZ(0); 
+      backface-visibility: hidden;
+    }
+    100% { 
+      transform: rotateX(180deg) translateZ(0);
+      backface-visibility: hidden;
+    }
+  }
+  
+  /* Optimized colon pulse animation */
+  @keyframes colonPulseOptimized {
+    0%, 50%, 100% { 
+      opacity: 1; 
+      transform: translateZ(0);
+    }
+    25%, 75% { 
+      opacity: 0.4; 
+      transform: translateZ(0);
+    }
+  }
+
+  /* Add column width constraints */
+  .jobcan-enhanced td.align-middle.text-left:has(form[id^="reasons-form"]),
+  .jobcan-enhanced td:has(#edit-reason-2_text),
+  .jobcan-enhanced td:has([id^="edit-reason-"]) {
+    max-width: 240px;
+    white-space: normal;
+    word-wrap: break-word;
+  }
+
+  .jobcan-enhanced td:has([id^="location-"]),
+  .jobcan-enhanced td.align-middle:has(span[id^="location-"]) {
+    max-width: 160px;
+    white-space: normal;
+    word-wrap: break-word;
+  }
+
+  /* Style for invalid custom selects */
+  .jobcan-enhanced .custom-select-wrapper[data-invalid="true"] {
+    border-color: var(--color-danger) !important;
+    box-shadow: 0 0 0 0.2rem var(--color-danger-light) !important;
+  }
+
+
+  /* Time suggestion chip styling */
+  .jobcan-enhanced .time-suggestion-chip {
+    position: absolute;
+    background-color: var(--color-primary-light);
+    color: var(--color-white);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-sm);
+    margin-top: -2px;
+    margin-left: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px var(--color-black-10);
+    z-index: var(--z-index-sidemenu);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    display: none;
+  }
+
+  .jobcan-enhanced .time-suggestion-chip:hover {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px var(--shadow-primary);
+  }
+
+  /* Change arrow direction from left to up in time-suggestion-chip */
+  .jobcan-enhanced .time-suggestion-chip::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: -5px;
+    transform: translateY(0);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid var(--color-primary-light);
+    transition: border-bottom-color 0.2s ease;
+  }
+
+  .jobcan-enhanced .time-suggestion-chip:hover::before {
+    border-bottom-color: var(--color-primary);
+  }
+
+  /* Ensure input positioning is relative for absolute chip positioning */
+  .jobcan-enhanced input.man-hour-input {
+    position: relative;
+  }
+
+  /* Validation tooltip styling */
+  .jobcan-enhanced .validation-tooltip {
+    position: absolute;
+    background-color: var(--color-danger);
+    color: var(--color-white);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-sm);
+    top: -30px;
+    left: 0;
+    z-index: var(--z-index-validation-tooltip);
+    display: none;
+    white-space: nowrap;
+    box-shadow: var(--shadow-tooltip);
+    pointer-events: none;
+    animation: pulse-danger 2s infinite;
+  }
+
+  /* Add arrow to tooltip */
+  .jobcan-enhanced .validation-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 10px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--color-danger);
+  }
+
+  /* Time scale marker positions */
+  .jobcan-enhanced .marker-position-0 {
+    left: 0%;
+  }
+
+  .jobcan-enhanced .marker-position-25 {
+    left: 25%;
+  }
+
+  .jobcan-enhanced .marker-position-50 {
+    left: 50%;
+  }
+
+  .jobcan-enhanced .marker-position-75 {
+    left: 75%;
+  }
+
+  .jobcan-enhanced .marker-position-100 {
+    left: 100%;
+  }
+
+  /* Specific element overrides */
+  .jobcan-enhanced tr th.jbc-text-sub span.pl-5 {
+    padding-left: 0 !important; /* Override bootstrap's pl-5 (3rem) with smaller padding */
+  }
+
+  /* Hide the time difference warning message */
+  .jobcan-enhanced #un-match-time {
+    display: none !important;
+  }
+
+  .jobcan-enhanced #select-template .mr-1 {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+  }
+
+  /* This will also catch other potential labels */
+  .jobcan-enhanced #select-template label {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+  }
+
+  /* Work Time Display Button and Overlay */
+  .work-time-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--color-black-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-index-tooltip);
+  }
+
+  .work-time-overlay-content {
+    background: white;
+    padding: 0;
+    border-radius: var(--border-radius-lg);
+    max-width: 450px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 5px 15px var(--shadow-md);
+    max-height: 80vh;
+    overflow-y: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  .work-time-overlay-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e9ecef;
+    background-color: #f8f9fa;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .work-time-overlay-header h3 {
+    margin: 0;
+    color: var(--color-primary, #3a5a79);
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .work-time-overlay-close {
+    position: relative;
+    background-color: var(--color-white);
+    color: var(--color-primary);
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+  }
+
+  .work-time-overlay-body {
+    padding: 20px;
+  }
+
+  .work-time-data-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .work-time-data-list li {
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+  }
+
+  .work-time-data-list li:last-child {
+    border-bottom: none;
+  }
+
+  .work-time-data-label {
+    font-weight: 500;
+    color: #495057;
+  }
+
+  .work-time-data-value {
+    font-weight: 600;
+    color: #212529;
+  }
+
+  .work-time-overlay-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    background-color: #f8f9fa;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+
+  .work-time-action-btn {
+    background-color: var(--color-primary, #3c5e7e);
+    color: white;
+    border: none;
+    font-size: 14px;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .work-time-action-btn:hover {
+    background-color: var(--color-primary-dark, #2a4b6a);
+  }
+
+  .work-time-no-data {
+    padding: 30px 20px;
+    text-align: center;
+    color: #6c757d;
+  }
+
+  .work-time-no-data p {
+    margin-bottom: 20px;
+    font-size: 15px;
+  }
+
+
+
+  .work-time-toggle-container {
+    text-align: center;
+    margin: 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #e9ecef;
+  }
+
+  
+
+  .work-time-overlay .zero-value-item {
+    color: var(--color-text-muted, #6c757d);
+  }
+
+  .work-time-overlay-title-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .work-time-overlay-header h3 {
+    margin: 0;
+    color: var(--color-primary, #3a5a79);
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+   
+
+  .attendance-page-link:hover {
+    text-decoration: underline;
+    color: var(--color-primary-dark, #2a4b6a);
+  }
+
+  .work-time-action-link {
+    font-size: 15px;
+  }
+
+
+  .work-time-section {
+    margin-bottom: 20px;
+  }
+
+  .work-time-divider {
+    border: none;
+    height: 1px;
+    background-color: var(--color-border-light, #dee2e6);
+    margin: 15px 0;
+  }
+
+  .user-info-section {
+    margin-bottom: 20px;
+  }
+
+  .work-time-data-section {
+    margin-bottom: 15px;
+  }
+
+  /* Update the refresh note to make it more subtle */
+  .work-time-refresh-note {
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--color-text-muted, #6c757d);
+    font-style: italic;
+    text-align: center;
+    padding-top: 10px;
+    border-top: 1px dashed var(--color-border-light, #e9ecef);
+  }
+
+
+
+  .month-selector-container {
+    padding-bottom: 10px;
+  }
+
+
+  .month-selector {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: left;
+  }
+
+  .jobcan-enhanced .month-selector-btn {
+    background-color: var(--color-white, #fff);
+    border: 1px solid var(--color-gray-200);
+    color: var(--color-gray-600);
+    padding: 2px 6px;
+    border-radius: var(--border-radius-sm);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .jobcan-enhanced .month-selector-btn:hover {
+    background-color: var(--color-gray-100);
+    color: var(--color-gray-800);
+    border-color: var(--color-gray-300);
+  }
+
+  .jobcan-enhanced .month-selector-btn.active {
+    background-color: var(--color-primary-light);
+    border-color: var(--color-primary-border-light);
+    color: var(--color-white);
+    font-weight: 500;
+  }
+
+  .jobcan-enhanced .month-selector-btn.loading {
+    position: relative;
+    color: var(--color-gray-600);
+  }
+
+  .jobcan-enhanced .month-selector-btn.loading::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border: 1.5px solid var(--color-white, #fff);
+    border-radius: var(--border-radius-circle);
+    border-top-color: transparent;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    animation: spinner-rotation 0.8s linear infinite;
+  }
+
+  @keyframes spinner-rotation {
+    from {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+  }
+
+  /* Add validation styles for required selects */
+  .jobcan-enhanced .validation-tooltip {
+    position: absolute;
+    background-color: var(--color-danger);
+    color: white;
+    padding: 6px 10px;
+    border-radius: var(--border-radius-sm);
+    font-size: 12px;
+    z-index: var(--z-index-dropdown);
+    top: -30px;
+    left: 0;
+    box-shadow: 0 2px 8px var(--shadow-md);
+    pointer-events: none;
+    white-space: nowrap;
+    text-align: center;
+    font-weight: 500;
+    transform: translateY(0);
+    opacity: 1;
+    animation: tooltip-fade-in 0.3s ease-out;
+  }
+
+  .jobcan-enhanced .validation-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 10px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--color-danger);
+  }
+
+  @keyframes tooltip-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Warning state for task select that needs attention after project select */
+  .jobcan-enhanced .custom-select-wrapper[data-needs-attention="true"] {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 0.2rem var(--color-danger-light);
+    animation: pulse-attention 1.5s infinite;
+  }
+
+  @keyframes pulse-attention {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 15, 39, 0.8);
+    }
+    70% {
+      box-shadow: 0 0 0 6px rgba(220, 53, 70, 0.01);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(220, 53, 70, 0.01);
+    }
+  }
+
+  #work-time-display-btn {
+    position: fixed;
+    bottom: 80px; /* Position above the screenshot button */
+    right: 20px;
+    z-index: var(--z-index-preview); /* Slightly lower z-index than screenshot button */
+    cursor: pointer;
+    background: var(--color-primary);
+    color: var(--color-white);
+    border-radius: var(--border-radius-circle);
+    width: 50px; 
+    height: 50px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px var(--color-black-20);
+    transition: all 0.3s ease;
+    will-change: transform, box-shadow;
+  }
+
+  #work-time-display-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px var(--color-black-30);
+  }
+  
+  #screenshot-selection-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: var(--z-index-screenshot-overlay);
+    cursor: crosshair;
+    background-color: var(--color-black-30);
+  }
+
+  /* Card-based data layout styles */
+  .work-time-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+  }
+
+  .work-time-card {
+    background: var(--color-white);
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 2px 6px var(--color-black-8);
+    padding: 12px;
+    position: relative;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-gray-200);
+  }
+
+  .work-time-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--color-black-12);
+  }
+
+  .work-time-card.zero-value-item {
+    opacity: 0.75;
+    background-color: var(--color-gray-100);
+  }
+
+  .work-time-card-label {
+    font-size: 12px;
+    color: var(--color-gray-600);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .work-time-card-value {
+    font-size: 16px;
+    color: var(--color-gray-900);
+    font-weight: 600;
+    margin-top: auto;
+  }
+
+  /* Grouped values styling */
+  .work-time-card-subvalues {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--color-gray-200);
+    font-size: 12px;
+  }
+
+  .work-time-card-subvalue {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3px;
+    color: var(--color-gray-700);
+  }
+
+  .work-time-card-subvalue.expiry-date {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-gray-600);
+  }
+
+  .work-time-subvalue-full-text {
+    font-size: 11px;
+  }
+
+  .work-time-card-subvalue-label {
+    font-size: 11px;
+    max-width: 70%;
+  }
+
+  .work-time-card-subvalue-data {
+    font-weight: 500;
+    color: var(--color-gray-800);
+  }
+
+  /* Adjust card padding for items with subvalues */
+  .work-time-card.has-subvalues {
+    padding-bottom: 8px;
+  }
+
+  /* Related items styling */
+  .work-time-card-relationship {
+    position: absolute;
+    top: 10px; /* Adjust top/right as needed */
+    right: 10px;
+    display: flex;
+    gap: 4px;
+    flex-wrap: nowrap; /* Prevent wrapping in the corner */
+    max-width: 50%; /* Limit width to avoid overlapping label */
+    justify-content: flex-end; /* Align links to the right */
+  }
+
+  .related-data-link {
+    font-size: 10px;
+    color: var(--color-primary);
+    background-color: var(--color-primary-hover-bg);
+    padding: 2px 6px;
+    border-radius: var(--border-radius-10);
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid var(--color-primary-border-light);
+  }
+
+  .related-data-link:hover {
+    background-color: var(--color-primary-active-bg);
+  }
+
+  /* Card categories */
+  .work-time-card.category-hours {
+    border-left: 3px solid var(--color-primary);
+  }
+
+  .work-time-card.category-days {
+    border-left: 3px solid var(--color-success);
+  }
+
+  .work-time-card.category-overtime {
+    border-left: 3px solid var(--color-warning);
+  }
+
+  .work-time-card.category-time {
+    border-left: 3px solid var(--color-info);
+  }
+
+  .work-time-card.category-absence {
+    border-left: 3px solid var(--color-danger);
+  }
+
+  .work-time-card.highlight {
+    background-color: var(--color-primary-focus-bg);
+    border-color: var(--color-primary-border);
+    animation: pulse-highlight 2s;
+  }
+
+  @keyframes pulse-highlight {
+    0% { box-shadow: 0 0 0 0 rgba(0, 119, 255, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 119, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 119, 255, 0); }
+  }
+
+  /* Prediction card styling */
+  .work-time-card.prediction-card {
+    background: linear-gradient(135deg, #fff8f0 0%, #ffffff 100%);
+    border: 2px solid var(--color-warning);
+    box-shadow: 0 3px 8px rgba(255, 193, 7, 0.15);
+    position: relative;
+  }
+
+  .work-time-card.prediction-card::before {
+    content: "予測";
+    position: absolute;
+    top: -8px;
+    left: 8px;
+    background: var(--color-warning);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    z-index: 1;
+  }
+
+  .work-time-card.prediction-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 12px rgba(255, 193, 7, 0.25);
+  }
+
+  .work-time-card.prediction-card .work-time-card-label {
+    color: var(--color-warning-dark, #d39e00);
+    font-weight: 600;
+  }
+
+  .work-time-card.prediction-card .work-time-card-value {
+    color: var(--color-warning-dark, #d39e00);
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .work-time-card.prediction-card .work-time-card-subvalue {
+    color: var(--color-gray-600);
+    background-color: rgba(255, 193, 7, 0.05);
+    padding: 2px 4px;
+    border-radius: 2px;
+    margin-bottom: 4px;
+  }
+
+  .work-time-card.prediction-card .work-time-card-subvalue-data {
+    color: var(--color-warning-dark, #d39e00);
+    font-weight: 600;
+  }
+
+  /* Legend at the top of the card container */
+  .work-time-cards-legend {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    color: var(--color-gray-700);
+  }
+
+  .legend-color {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--border-radius-sm);
+    margin-right: 5px;
+  }
+
+  .legend-color.hours { background-color: var(--color-primary); }
+  .legend-color.days { background-color: var(--color-success); }
+  .legend-color.overtime { background-color: var(--color-warning); }
+  .legend-color.time { background-color: var(--color-info); }
+  .legend-color.absence { background-color: var(--color-danger); }
+
+  /* Styling for paid leave sub-details */
+  .work-time-sub-detail {
+    background-color: var(--color-gray-100);
+    margin: 2px 0;
+    padding: 6px 10px !important; /* Override default li padding */
+    border-radius: var(--border-radius-sm);
+    border-left: 3px solid var(--color-info);
+  }
+
+  .work-time-sub-detail .sub-detail-label {
+    font-size: 12px;
+    font-weight: normal;
+    color: var(--color-gray-700);
+  }
+
+  .work-time-sub-detail .sub-detail-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-gray-900);
+  }
+
+  /* Prevent white flash on hover by disabling transitions on table cells */
+  .jobcan-enhanced td, .jobcan-enhanced th {
+    transition: none !important;
+  }
+
+  /* Force hover background completely covers row */
+  .jobcan-enhanced tr:not(.no-hover):hover td {
+    background-color: var(--color-table-hover-bg) !important;
+  }
+
+  /* Override state row hover colors for dark mode */
+  .jobcan-enhanced .table tr.success:hover td,
+  .jobcan-enhanced .jbc-table tr.success:hover td {
+    background-color: var(--color-success-bg) !important;
+  }
+  .jobcan-enhanced .table tr.warning:hover td,
+  .jobcan-enhanced .jbc-table tr.warning:hover td {
+    background-color: var(--color-warning-bg) !important;
+  }
+  .jobcan-enhanced .table tr.danger:hover td,
+  .jobcan-enhanced .jbc-table tr.danger:hover td {
+    background-color: var(--color-danger-bg) !important;
+  }
+
+
+
+  /* Ensure today-record rows show properly in dark mode */
+  .jobcan-enhanced tr.today-record td,
+  .jobcan-enhanced .table tr.today-record td,
+  .jobcan-enhanced .jbc-table tr.today-record td {
+    background-color: var(--color-primary-active-bg) !important;
+    color: var(--color-text-primary) !important;
+    font-weight: 600 !important;
+  }
+  
+  .jobcan-enhanced tr.today-record:hover td,
+  .jobcan-enhanced .table tr.today-record:hover td,
+  .jobcan-enhanced .jbc-table tr.today-record:hover td {
+    background-color: var(--color-primary-active-bg) !important;
+  }
+
+  .attendance-page-link {
+    color: var(--color-primary, #3a5a79);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .attendance-page-link:hover {
+    text-decoration: underline;
+    color: var(--color-primary-dark, #2a4b6a);
+  }
+ 
+
+  /* Add style for jbc-table-danger to reflect danger status */
+  .jobcan-enhanced tr.jbc-table-danger,
+  .jobcan-enhanced .table tr.jbc-table-danger,
+  .jobcan-enhanced .jbc-table tr.jbc-table-danger {
+    background-color: var(--color-emergency-bg) !important;
+    color: var(--color-emergency-text) !important;
+  }
+
+  .jobcan-enhanced tr.jbc-table-danger td,
+  .jobcan-enhanced .table tr.jbc-table-danger td,
+  .jobcan-enhanced .jbc-table tr.jbc-table-danger td,
+  .jobcan-enhanced tr.jbc-table-danger th,
+  .jobcan-enhanced .table tr.jbc-table-danger th,
+  .jobcan-enhanced .jbc-table tr.jbc-table-danger th {
+    background-color: var(--color-emergency-bg) !important;
+    color: var(--color-emergency-text) !important;
+  }
+
+  .jobcan-enhanced tr.jbc-table-danger:hover td,
+  .jobcan-enhanced .table tr.jbc-table-danger:hover td,
+  .jobcan-enhanced .jbc-table tr.jbc-table-danger:hover td {
+    background-color: var(--color-danger-light) !important;
+    color: var(--color-danger-text-light) !important;
+  }
+
+  #work-time-display-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px var(--color-black-30);
+  }
+  
+  /* Table filter buttons for man-hour-manage page */
+  #table-filter-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px 0;
+    z-index: var(--z-index-sidemenu-link);
+    background-color: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  
+  /* Fixed position container that shows when scrolling */
+  #fixed-table-filter-buttons {
+    display: none;
+    position: fixed;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px;
+    z-index: var(--z-index-sidemenu-link);
+    background-color: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: 0 2px 5px var(--color-black-10);
+  }
+  
+  .table-filter-btn {
+    min-width: 80px;
+    height: 32px;
+    border-radius: var(--border-radius-xl);
+    border: 1px solid var(--color-border);
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    padding: 0 16px;
+  }
+  
+  .table-filter-btn.active {
+    transform: translateY(0);
+  }
+
+  .table-filter-btn[data-filter="all"] {
+    background-color: var(--color-black-3);
+    color: var(--color-primary);
+  }
+
+  .table-filter-btn[data-filter="danger"] {
+    background-color: var(--color-black-3);
+    color: var(--color-danger);
+  }
+
+  .table-filter-btn[data-filter="report"] {
+    background-color: var(--color-black-3);
+    color: var(--color-warning);
+  }
+
+  .table-filter-btn.active[data-filter="all"] {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+  }
+
+  .table-filter-btn.active[data-filter="danger"] {
+    background-color: var(--color-danger);
+    color: var(--color-white);
+  }
+
+  .table-filter-btn.active[data-filter="report"] {
+    background-color: var(--color-warning);
+    color: var(--color-white);
+  }
+
+  .table-filter-label-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .project-reload-icon {
+    display: inline-flex;
+    align-items: center;
+    opacity: 0.82;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .project-reload-icon:hover {
+    opacity: 1;
+    transform: rotate(28deg);
+  }
+
+  .project-reload-icon.spinning {
+    animation: project-reload-spin 0.8s linear infinite;
+  }
+
+  @keyframes project-reload-spin {
+    from {
+      transform: rotate(0);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  /* Button hover effect */
+  .table-filter-btn:hover {
+    background-color: inherit;
+    color: inherit;
+    box-shadow: none !important;
+    transform: translateY(0) !important;
+  }
+
+  .table-filter-btn[data-filter="all"]:hover {
+    background-color: var(--color-black-8);
+    color: var(--color-primary);
+  }
+
+  .table-filter-btn[data-filter="danger"]:hover {
+    background-color: rgba(220, 53, 69, 0.12);
+    color: var(--color-danger);
+  }
+
+  .table-filter-btn[data-filter="report"]:hover {
+    background-color: rgba(255, 193, 7, 0.18);
+    color: var(--color-warning);
+  }
+
+  .table-filter-btn.active[data-filter="all"]:hover {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+  }
+
+  .table-filter-btn.active[data-filter="danger"]:hover {
+    background-color: var(--color-danger);
+    color: var(--color-white);
+  }
+
+  .table-filter-btn.active[data-filter="report"]:hover {
+    background-color: var(--color-warning);
+    color: var(--color-white);
+  }
+
+  .table-report-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--color-black-50);
+    z-index: var(--z-index-notification);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .table-report-modal {
+    width: min(800px, 96vw);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-background);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 16px 38px var(--color-black-30);
+    overflow: hidden;
+  }
+
+  .table-report-header {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--color-border);
+    background: linear-gradient(95deg, var(--color-card), var(--color-black-3));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .table-report-title {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.2;
+    color: var(--color-text-primary);
+  }
+
+  .table-report-timestamp {
+    margin-top: 4px;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+  }
+
+  .table-report-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .table-report-action-btn,
+  .table-report-close-btn {
+    border: none;
+    border-radius: var(--border-radius-sm);
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .table-report-action-btn {
+    background: var(--color-primary);
+    color: var(--color-white);
+  }
+
+  .table-report-action-btn:hover {
+    filter: brightness(1.05);
+  }
+
+  .table-report-action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .table-report-close-btn {
+    background: var(--color-gray-300);
+    color: var(--color-text-primary);
+  }
+
+  .table-report-close-btn:hover {
+    background: var(--color-gray-400);
+  }
+
+  .table-report-body {
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px 18px 24px;
+    display: grid;
+    gap: 16px;
+  }
+
+  .table-report-body > * {
+    min-width: 0;
+  }
+
+  .table-report-month-tabs-host {
+    margin-bottom: 2px;
+  }
+
+  .table-report-month-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .table-report-month-tab {
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-xl);
+    background: var(--color-white);
+    color: var(--color-text-secondary);
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .table-report-month-tab:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  .table-report-month-tab.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-white);
+  }
+
+  .jobcan-enhanced body.dark-mode .table-report-month-tab {
+    background: color-mix(in srgb, var(--color-card) 86%, var(--color-black-10) 14%);
+    border-color: color-mix(in srgb, var(--color-border) 78%, var(--color-white) 22%);
+    color: #d6dde8;
+  }
+
+  .jobcan-enhanced body.dark-mode .table-report-month-tab:hover {
+    background: color-mix(in srgb, var(--color-primary) 22%, var(--color-card) 78%);
+    border-color: color-mix(in srgb, var(--color-primary) 62%, var(--color-border) 38%);
+    color: #eef4ff;
+  }
+
+  .jobcan-enhanced body.dark-mode .table-report-month-tab.active {
+    background: color-mix(in srgb, var(--color-primary) 78%, #0b1c35 22%);
+    border-color: color-mix(in srgb, var(--color-primary) 72%, var(--color-white) 28%);
+    color: #f5f9ff;
+  }
+
+  .table-report-kpis {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(140px, 1fr));
+    gap: 10px;
+  }
+
+  .table-report-kpi-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    background: var(--color-card);
+    padding: 10px 12px;
+  }
+
+  .table-report-kpi-label {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+
+  .table-report-kpi-value {
+    margin-top: 4px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  .table-report-kpi-detail {
+    margin-top: 6px;
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--color-text-secondary);
+    overflow-wrap: anywhere;
+  }
+
+  .table-report-section {
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    padding: 12px;
+    background: var(--color-card);
+    min-width: 0;
+  }
+
+  .table-report-section-title {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  .table-report-empty {
+    padding: 14px;
+    text-align: center;
+    color: var(--color-text-secondary);
+    background: var(--color-background);
+    border-radius: var(--border-radius-sm);
+  }
+
+  .table-report-project-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .table-report-project-item {
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    background: var(--color-background);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .table-report-project-top {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    align-items: center;
+  }
+
+  .table-report-project-name {
+    font-weight: 600;
+    flex: 1;
+    color: var(--color-text-primary);
+    overflow-wrap: anywhere;
+  }
+
+  .table-report-project-value {
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+  }
+
+  .table-report-project-toggle {
+    border: 1px solid var(--color-border) !important;
+    background: color-mix(in srgb, var(--color-card) 92%, var(--color-black-3) 8%) !important;
+    color: var(--color-text-secondary);
+    border-radius: var(--border-radius-sm) !important;
+    height: 24px !important;
+    padding: 0 8px !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    opacity: 0.9 !important;
+  }
+
+  .table-report-project-toggle:hover {
+    background: color-mix(in srgb, var(--color-card) 84%, var(--color-black-8) 16%);
+    color: var(--color-text-primary);
+    opacity: 1;
+  }
+
+  .table-report-project-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .table-report-project-download {
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-card) 90%, var(--color-info) 10%);
+    color: var(--color-text-secondary);
+    border-radius: var(--border-radius-sm);
+    height: 24px;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.92;
+  }
+
+  .table-report-project-download:hover {
+    background: color-mix(in srgb, var(--color-card) 78%, var(--color-info) 22%);
+    color: var(--color-text-primary);
+    opacity: 1;
+  }
+
+  .table-report-project-bar {
+    height: 8px;
+    background: var(--color-gray-200);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .table-report-project-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-info));
+  }
+
+  .table-report-project-detail {
+    display: grid;
+    gap: 12px;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 1px solid transparent;
+    pointer-events: none;
+    transition: max-height 0.32s ease, opacity 0.24s ease, margin-top 0.24s ease, padding-top 0.24s ease, border-color 0.24s ease;
+  }
+
+  .table-report-project-item.is-open .table-report-project-detail {
+    max-height: 1200px;
+    opacity: 1;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top-color: var(--color-border);
+    pointer-events: auto;
+  }
+
+  .table-report-project-item.is-open {
+    border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border) 65%);
+    box-shadow: 0 2px 8px var(--color-black-8);
+  }
+
+  .table-report-project-day-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    overflow-x: hidden;
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    padding: 8px 4px 2px;
+    min-height: 170px;
+  }
+
+  .table-report-vbar-col {
+    min-width: 0;
+    max-width: 62px;
+    flex: 1 1 48px;
+    display: grid;
+    gap: 4px;
+    justify-items: center;
+  }
+
+  .table-report-vbar-box {
+    width: 32px;
+    height: 100px;
+    border-radius: 8px;
+    background: var(--color-gray-200);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  .table-report-vbar-fill {
+    width: 100%;
+    background: linear-gradient(180deg, var(--color-primary), var(--color-info));
+    border-radius: 8px 8px 0 0;
+  }
+
+  .table-report-vbar-label {
+    width: 100%;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    text-align: center;
+    overflow-wrap: anywhere;
+    line-height: 1.1;
+  }
+
+  .table-report-vbar-value {
+    font-size: 11px;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .table-report-project-task-detail {
+    overflow-x: auto;
+  }
+
+  .table-report-task-groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .table-report-task-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    background: var(--color-background);
+    overflow: hidden;
+  }
+
+  .table-report-task-card-title {
+    padding: 10px 12px;
+    background: var(--color-black-3);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .table-report-task-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .table-report-task-table th,
+  .table-report-task-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+  }
+
+  .table-report-task-table th {
+    background: var(--color-black-3);
+    color: var(--color-text-secondary);
+    font-weight: 600;
+  }
+
+  .table-report-task-table td:nth-child(2),
+  .table-report-task-table td:nth-child(3) {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .table-report-day-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .table-report-day-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    background: var(--color-background);
+    overflow: hidden;
+  }
+
+  .table-report-day-card.is-mismatch {
+    border-left: 4px solid var(--color-danger);
+  }
+
+  .table-report-day-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--color-black-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .table-report-day-date-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .table-report-day-date {
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  .table-report-day-total {
+    font-variant-numeric: tabular-nums;
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+
+  .table-report-day-no-data {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .table-report-day-refetch-btn {
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-card) 92%, var(--color-black-3) 8%);
+    color: var(--color-text-secondary);
+    border-radius: var(--border-radius-sm);
+    height: 24px;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.9;
+  }
+
+  .table-report-day-refetch-btn:hover {
+    background: color-mix(in srgb, var(--color-card) 84%, var(--color-black-8) 16%);
+    color: var(--color-text-primary);
+    opacity: 1;
+  }
+
+  .table-report-day-refetch-btn:disabled {
+    opacity: 0.7;
+    cursor: wait;
+  }
+
+  .table-report-day-edit-btn {
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-primary) 14%, var(--color-card) 86%);
+    color: var(--color-text-primary);
+    border-radius: var(--border-radius-sm);
+    height: 24px;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.95;
+  }
+
+  .table-report-day-edit-btn:hover {
+    background: color-mix(in srgb, var(--color-primary) 24%, var(--color-card) 76%);
+    color: var(--color-text-primary);
+  }
+
+  .table-report-day-edit-btn:disabled {
+    opacity: 0.7;
+    cursor: wait;
+  }
+
+  .table-report-day-rows {
+    display: grid;
+  }
+
+  .table-report-day-row {
+    display: grid;
+    grid-template-columns: 5fr 1fr 0.5fr;
+    gap: 10px;
+    padding: 8px 12px;
+    border-bottom: 1px dashed var(--color-border);
+    font-size: 12px;
+    align-items: center;
+  }
+
+  .table-report-day-row:last-child {
+    border-bottom: none;
+  }
+
+  .table-report-day-row.is-project-unselected {
+    background: color-mix(in srgb, var(--color-warning) 12%, transparent 88%);
+    border-left: 3px solid color-mix(in srgb, var(--color-warning) 60%, var(--color-border) 40%);
+  }
+
+  .table-report-day-cell {
+    min-width: 0;
+  }
+
+  .table-report-day-project,
+  .table-report-day-task {
+    color: var(--color-text-primary);
+    overflow-wrap: anywhere;
+  }
+
+  .table-report-day-row select.table-report-day-project,
+  .table-report-day-row select.table-report-day-task,
+  .table-report-day-row input.table-report-day-minutes {
+    border: 1px solid var(--color-border);
+    background: var(--color-card);
+    color: var(--color-text-primary);
+    border-radius: var(--border-radius-sm);
+    padding: 4px 8px;
+    font-size: 12px;
+    min-width: 0;
+  }
+
+  .table-report-day-row select.table-report-day-project,
+  .table-report-day-row select.table-report-day-task {
+    appearance: auto;
+  }
+
+  .table-report-day-minutes {
+    text-align: right;
+    color: var(--color-success-dark);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .table-report-day-row input.table-report-day-minutes {
+    text-align: right;
+    font-weight: 600;
+  }
+
+  .table-report-day-editor {
+    display: none;
+  }
+
+  .table-report-day-card.is-editing .table-report-day-display {
+    display: none;
+  }
+
+  .table-report-day-card.is-editing .table-report-day-editor {
+    display: block;
+  }
+
+  .table-report-day-empty {
+    padding: 10px 12px;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+  }
+
+  @media (max-width: 1080px) {
+    .table-report-kpis {
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
+    }
+
+    .table-report-task-groups {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .table-report-modal-overlay {
+      padding: 10px;
+    }
+
+    .table-report-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .table-report-actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+
+    .table-report-kpis {
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+    }
+
+    .table-report-day-row {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .table-report-day-minutes {
+      text-align: left;
+    }
+  }
+
+  /* Loading overlay for project check */
+  .project-check-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-black-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-index-notification);
+  }
+  
+  .project-check-message {
+    background-color: var(--color-background);
+    padding: 20px;
+    border-radius: var(--border-radius-md);
+    text-align: center;
+    max-width: 400px;
+  }
+
+  .project-check-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .project-check-subtitle {
+    margin-top: 8px;
+    color: var(--color-gray-700);
+    font-size: 13px;
+  }
+
+  .project-check-progress {
+    margin-top: 14px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--color-gray-200);
+    overflow: hidden;
+  }
+
+  .project-check-progress-bar {
+    width: 0;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--color-primary);
+    transition: width 0.15s ease;
+  }
+
+  .project-check-progress-text {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .project-check-elapsed {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--color-gray-700);
+  }
+
+  /* Cancel button for project checking */
+  .project-check-cancel-btn {
+    background-color: var(--color-danger);
+    color: var(--color-text-on-primary);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 15px;
+    box-shadow: 0 2px 5px var(--color-black-20);
+  }
+
+  .project-check-cancel-btn:hover {
+    background-color: var(--color-danger-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--color-black-30);
+  }
+
+  .project-check-cancel-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px var(--color-black-20);
+  }
+
+  /* ==========================================================================
+     12. Utilities
+     ========================================================================== */
+  /* Hide empty padding div */
+  .jobcan-enhanced .text-right.px-3.py-3 {
+    display: none !important;
+  }
+
+  /* Fix for duplicate sidemenus */
+  .jobcan-enhanced .sidemenu + .sidemenu,
+  .jobcan-enhanced #sidemenu + #sidemenu,
+  .jobcan-enhanced .sidemenu.hidden,
+  .jobcan-enhanced #sidemenu.hidden,
+  .jobcan-enhanced .sidemenu[style*="display: none"],
+  .jobcan-enhanced #sidemenu[style*="display: none"] {
+    display: none !important;
+  }
+
+  /* Ensure proper display for open/closed states */
+  .jobcan-enhanced .menuArea[style*="display: none"] + .menuArea,
+  .jobcan-enhanced .menuArea.closed + .menuArea,
+  .jobcan-enhanced .sidebar-collapsed .sidemenu,
+  .jobcan-enhanced .sidebar-hidden .sidemenu,
+  .jobcan-enhanced .menu-collapsed .sidemenu,
+  .jobcan-enhanced .sidemenu.closed,
+  .jobcan-enhanced #sidemenu.closed {
+    display: none !important;
+  }

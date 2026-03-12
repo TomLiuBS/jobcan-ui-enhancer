@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "Jobcan UI Enhancer",
+  "version": "1.2.4",
+  "description": "Transform Jobcan into a modern, intuitive interface with improved navigation, visual design, and productivity features",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://ssl.jobcan.jp/employee/*",
+        "*://id.jobcan.jp/users/sign_in*"
+      ],
+      "css": ["css/variables.css", "css/base.css", "css/styles.css", "css/responsive.css"],
+      "js": [
+        "html2canvas.min.js",
+        "confetti.min.js",
+        "scripts/utils.js",
+        "scripts/draggable.js",
+        "scripts/ui.js",
+        "scripts/clock.js",
+        "scripts/screenshot.js",
+        "scripts/formEnhancer.js",
+        "scripts/dataExtraction.js",
+        "scripts/overlay.js",
+        "scripts/tableFilter.js",
+        "scripts/main.js",
+        "scripts/loginInjector.js"
+      ]
+    }
+  ],
+  
+  "web_accessible_resources": [
+    {
+      "resources": ["html2canvas.min.js", "confetti.min.js"],
+      "matches": ["*://ssl.jobcan.jp/*", "*://id.jobcan.jp/*"]
+    }
+  ],
+
+  "permissions": ["activeTab", "storage", "tabs", "scripting"],
+  
+  "host_permissions": [
+    "*://ssl.jobcan.jp/*",
+    "*://id.jobcan.jp/*"
+  ]
+}

@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Jobcan UI Enhancer</title>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Color Palette - Based on Design Guide */
+      --color-primary: #0066DD;
+      --color-primary-light: #4D94E9;
+      --color-primary-dark: #0047AB;
+      
+      --color-secondary: #6C757D;
+      --color-secondary-light: #ADB5BD;
+      --color-secondary-dark: #495057;
+      
+      --color-accent: #28A745;
+      --color-accent-light: #5CC072;
+      --color-accent-dark: #1E7E34;
+      
+      --color-background: #FFFFFF;
+      --color-surface: #F8F9FA;
+      --color-card: #FFFFFF;
+      
+      --color-text-primary: #212529;
+      --color-text-secondary: #6C757D;
+      --color-text-disabled: #ADB5BD;
+      
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 8px rgba(0,0,0,0.08);
+      --shadow-hover: 0 6px 12px rgba(0,0,0,0.1);
+      
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      
+      --radius-sm: 0.25rem;
+      --radius-md: 0.5rem;
+      --radius-full: 9999px;
+      
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', Meiryo, sans-serif;
+      
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+    }
+    
+    body {
+      width: 340px;
+      font-family: var(--font-family);
+      padding: var(--space-md);
+      color: var(--color-text-primary);
+      background-color: var(--color-background);
+      margin: 0;
+      line-height: 1.5;
+    }
+    
+    .popup-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    
+    .popup-logo {
+      width: 28px;
+      height: 28px;
+      margin-right: var(--space-sm);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    h1 {
+      font-size: 1.1rem;
+      margin: 0;
+      color: var(--color-primary);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    
+    .setting-group {
+      margin-bottom: var(--space-md);
+      background-color: var(--color-card);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+    
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-sm);
+      padding: var(--space-xs) var(--space-xs);
+      border-radius: var(--radius-sm);
+      transition: background-color var(--transition-fast);
+    }
+    
+    .setting-item:hover {
+      background-color: rgba(0,0,0,0.01);
+    }
+    
+    .setting-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .setting-info {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .setting-item-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .setting-item-description {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+      margin-top: var(--space-xs);
+    }
+    
+    /* Status indicator */
+    .status-indicator {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
+      display: inline-block;
+      margin-left: var(--space-xs);
+    }
+    
+    .status-enabled {
+      background-color: var(--color-accent-light);
+      color: white;
+    }
+    
+    .status-disabled {
+      background-color: var(--color-secondary-light);
+      color: white;
+    }
+    
+    /* Modern Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 20px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--color-secondary-light);
+      transition: var(--transition-fast);
+      border-radius: var(--radius-full);
+    }
+    
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: var(--transition-fast);
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    
+    input:checked + .toggle-slider {
+      background-color: var(--color-primary);
+    }
+    
+    input:focus + .toggle-slider {
+      box-shadow: 0 0 1px var(--color-primary);
+    }
+    
+    input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
+    
+    /* Toast notification */
+    #toast {
+      visibility: hidden;
+      min-width: 250px;
+      background-color: var(--color-primary);
+      color: white;
+      text-align: center;
+      border-radius: var(--radius-md);
+      padding: var(--space-sm) var(--space-md);
+      position: fixed;
+      z-index: 1000;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 30px;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow-md);
+    }
+    
+    #toast.show {
+      visibility: visible;
+      animation: fadein 0.3s, fadeout 0.3s 1.7s;
+    }
+    
+    @keyframes fadein {
+      from {bottom: 0; opacity: 0;}
+      to {bottom: 30px; opacity: 1;}
+    }
+    
+    @keyframes fadeout {
+      from {bottom: 30px; opacity: 1;}
+      to {bottom: 0; opacity: 0;}
+    }
+    
+    .note {
+      background-color: var(--color-surface);
+      border-left: 3px solid var(--color-primary);
+      padding: var(--space-sm) var(--space-md);
+      margin-top: var(--space-md);
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .footer {
+      font-size: 0.7rem;
+      color: var(--color-text-secondary);
+      margin-top: var(--space-md);
+      text-align: center;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      padding-top: var(--space-sm);
+    }
+    
+    /* Coming soon badge */
+    .coming-soon {
+      display: inline-block;
+      background-color: var(--color-accent);
+      color: white;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
+      margin-left: var(--space-xs);
+      font-weight: 500;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    /* Dark Mode Styling */
+    body.dark-mode {
+      background-color: #1e1e2e;
+      color: #e4e6eb;
+    }
+    
+    body.dark-mode .setting-group {
+      background-color: #272736;
+      border-color: #3a3a4c;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    
+    body.dark-mode .setting-section-title {
+      color: #e4e6eb;
+    }
+    
+    body.dark-mode .setting-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    body.dark-mode .setting-item-description {
+      color: #b0b3b8;
+    }
+    
+    body.dark-mode .popup-header {
+      border-bottom-color: #3a3a4c;
+    }
+    
+    body.dark-mode .footer {
+      border-top-color: #3a3a4c;
+      color: #b0b3b8;
+    }
+    
+    body.dark-mode .quick-access-btn {
+      background-color: #2a2a3c;
+      color: #e4e6eb;
+      border-color: #3a3a4c;
+    }
+    
+    body.dark-mode .quick-access-btn:hover {
+      background-color: var(--color-primary-dark);
+    }
+    
+    body.dark-mode .main-btn {
+      background-color: var(--color-primary);
+    }
+    
+    body.dark-mode .note {
+      background-color: #2a2a3c;
+      border-left-color: var(--color-primary);
+      color: #b0b3b8;
+    }
+    
+    body.dark-mode .radio-group {
+      background-color: #2a2a3c;
+      border-color: #3a3a4c;
+    }
+    
+    body.dark-mode .sub-menu {
+      background-color: #272736;
+      border-color: #3a3a4c;
+    }
+    
+    body.dark-mode .sub-menu-item {
+      color: #e4e6eb;
+    }
+    
+    body.dark-mode .sub-menu-item:hover {
+      background-color: #2a2a3c;
+    }
+    
+    /* Radio button group styling */
+    .radio-group {
+      display: flex;
+      gap: 4px;
+      background-color: var(--color-surface);
+      padding: 3px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .radio-option {
+      display: flex;
+      align-items: center;
+      font-size: 0.75rem;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .radio-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .radio-option span {
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      transition: all var(--transition-fast);
+    }
+    
+    .radio-option input[type="radio"]:checked + span {
+      background-color: var(--color-primary);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .setting-section-title {
+      font-size: 0.9rem;
+      margin: 0 0 10px 0;
+      color: var(--color-text-primary);
+      font-weight: 600;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    
+    /* Quick access button styling */
+    .quick-access-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    
+    .quick-access-btn {
+      display: flex;
+      align-items: center;
+      background-color: var(--color-surface);
+      color: var(--color-text-primary);
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: var(--radius-md);
+      padding: 8px 10px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all var(--transition-normal);
+      text-decoration: none;
+      height: 20px;
+    }
+    
+    .quick-access-btn:hover {
+      background-color: var(--color-primary-light);
+      color: white;
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+    
+    .quick-access-btn:active {
+      transform: translateY(0);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .main-btn {
+      grid-column: span 2;
+      background-color: var(--color-primary);
+      color: white;
+      height: 40px;
+    }
+    
+    .main-btn:hover {
+      background-color: var(--color-primary-dark);
+    }
+
+    .login-form {
+      grid-column: span 2;
+      background-color: var(--color-surface);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+    
+    .btn-icon {
+      width: 20px;
+      height: 20px;
+      margin-right: var(--space-xs);
+      flex-shrink: 0;
+      color: inherit;
+    }
+    
+    /* Dropdown menu styling */
+    .dropdown-container {
+      position: relative;
+    }
+    
+    .expand-icon {
+      margin-left: auto;
+      font-weight: bold;
+      font-size: 14px;
+      transition: transform var(--transition-fast);
+    }
+    
+    .sub-menu {
+      display: none;
+      position: absolute;
+      background-color: white;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      padding: 4px 0;
+      z-index: 100;
+      width: 190px;
+      right: 0;
+      margin-top: 4px;
+      animation: fadeIn 0.2s ease;
+      transform-origin: top right;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    .sub-menu-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      color: var(--color-text-primary);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all var(--transition-fast);
+    }
+    
+    .sub-menu-item:hover {
+      background-color: var(--color-surface);
+      color: var(--color-primary);
+    }
+    
+    .sub-menu-item i {
+      margin-right: 8px;
+      color: var(--color-primary);
+    }
+    
+    .dropdown-container .quick-access-btn .material-icons {
+      color: inherit;
+    }
+    
+    .material-icons {
+      font-size: 18px;
+    }
+    
+    /* Login Form Styling */
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    
+    .login-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .login-field label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+    
+    .login-field input {
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(0,0,0,0.1);
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      transition: border-color var(--transition-fast);
+    }
+    
+    .login-field input:focus {
+      border-color: var(--color-primary);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0, 102, 221, 0.2);
+    }
+    
+    .remember-me {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 4px;
+    }
+    
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .checkbox-container input {
+      margin-right: 8px;
+    }
+    
+    .login-actions {
+      display: flex;
+      gap: var(--space-sm);
+      margin-top: 0;
+    }
+    
+    .login-btn, .cancel-btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-family);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      border: none;
+      flex: 1;
+    }
+    
+    .login-btn {
+      background-color: var(--color-primary);
+      color: white;
+    }
+    
+    .login-btn:hover {
+      background-color: var(--color-primary-dark);
+    }
+    
+    .cancel-btn {
+      background-color: var(--color-secondary-light);
+      color: white;
+    }
+    
+    .cancel-btn:hover {
+      background-color: var(--color-secondary-dark);
+    }
+    
+   
+    
+    /* Dark mode styles for login form */
+    body.dark-mode .login-form {
+      background-color: #2a2a3c;
+      border-color: #3a3a4c;
+    }
+
+    body.dark-mode .login-field label {
+      color: #e4e6eb;
+    }
+    
+    body.dark-mode .login-field input {
+      background-color: #2a2a3c;
+      border-color: #3a3a4c;
+      color: #e4e6eb;
+    }
+    
+    body.dark-mode .login-field input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(0, 102, 221, 0.3);
+    }
+    
+    body.dark-mode .checkbox-container {
+      color: #e4e6eb;
+    }
+    
+    body.dark-mode .cancel-btn {
+      background-color: #3a3a4c;
+    }
+    
+    body.dark-mode .cancel-btn:hover {
+      background-color: #4d4d63;
+    }
+    
+    /* Enhance the security note styling */
+    .security-note {
+      font-size: 0.65rem;
+      color: #f57c00;
+      margin-top: 8px;
+      margin-left: 4px;
+    }
+    
+    body.dark-mode .security-note {
+      color: #ffb74d;
+    }
+  </style>
+</head>
+<body>
+  <div class="popup-header">
+    <img src="icons/icon48.png" alt="Jobcan UI Enhancer" class="popup-logo">
+    <h1>Jobcan UI Enhancer</h1>
+  </div>
+  
+  <div class="setting-group">
+    <h2 class="setting-section-title">Quick Access</h2>
+    
+    <div class="quick-access-grid">
+      <button id="employeeLoginBtn" class="quick-access-btn main-btn">
+        <img src="icons/icon48.png" alt="Jobcan" class="btn-icon">
+        <span>Employee Login</span>
+        <i class="material-icons" id="loginSettingsIcon" style="margin-left: auto; font-size: 16px;">settings</i>
+      </button>
+       <!-- Login Form (Hidden by default) -->
+      <div id="loginForm" class="login-form" style="display:none;">
+        <h2 class="setting-section-title">Jobcan Login</h2>
+        
+        <div class="login-container">
+          <div class="login-field">
+            <label for="loginEmail">Email or ID</label>
+            <input type="text" id="loginEmail" placeholder="Enter your email or ID" />
+          </div>
+          
+          <div class="login-field">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter your password" />
+          </div>
+          
+          <div class="remember-me">
+            <label class="checkbox-container">
+              <input type="checkbox" id="rememberLogin">
+              <span class="checkmark"></span>
+              Remember ID and PW
+            </label>
+            <div class="security-note" id="securityNote" style="display: none;">⚠️ Use only on personal devices</div>
+          </div>
+        </div>
+      </div>
+      <a href="https://ssl.jobcan.jp/employee/attendance" class="quick-access-btn">
+        <i class="material-icons btn-icon">calendar_today</i>
+        <span>出勤簿</span>
+      </a>
+      
+      <div class="dropdown-container">
+        <a href="#" class="quick-access-btn">
+          <i class="material-icons btn-icon">access_time</i>
+          <span>打刻修正</span>
+          <span class="expand-icon" id="timeCorrection-expand">+</span>
+        </a>
+        <div class="sub-menu" id="timeCorrection-menu">
+          <a href="https://ssl.jobcan.jp/employee/adit" class="sub-menu-item">
+            <i class="material-icons" style="font-size: 16px;">edit</i>
+            打刻修正(1日1件単位)
+          </a>
+          <a href="https://ssl.jobcan.jp/employee/attendance/edit" class="sub-menu-item">
+            <i class="material-icons" style="font-size: 16px;">date_range</i>
+            出退勤編集(1か月単位)
+          </a>
+        </div>
+      </div>
+      
+      <div class="dropdown-container">
+        <a href="#" class="quick-access-btn">
+          <i class="material-icons btn-icon">build</i>
+          <span>工数管理</span>
+          <span class="expand-icon" id="manHour-expand">+</span>
+        </a>
+        <div class="sub-menu" id="manHour-menu">
+          <a href="https://ssl.jobcan.jp/employee/man-hour-manage" class="sub-menu-item">
+            <i class="material-icons" style="font-size: 16px;">work</i>
+            工数管理
+          </a>
+          <a href="https://ssl.jobcan.jp/employee/man-hour-template/list" class="sub-menu-item">
+            <i class="material-icons" style="font-size: 16px;">list</i>
+            工数かんたん入力設定
+          </a>
+        </div>
+      </div>
+      
+      <div class="dropdown-container">
+        <a href="#" class="quick-access-btn">
+          <i class="material-icons btn-icon">description</i>
+          <span>申請</span>
+          <span class="expand-icon" id="application-expand">+</span>
+        </a>
+        <div class="sub-menu" id="application-menu">
+          <a href="https://ssl.jobcan.jp/employee/holiday" class="sub-menu-item">
+            <i class="material-icons" style="font-size: 16px;">event_available</i>
+            休暇申請
+          </a>
+          <a href="https://ssl.jobcan.jp/employee/over-work" class="sub-menu-item">
+            <i class="material-icons" style="font-size: 16px;">access_time</i>
+            残業申請
+          </a>
+          <a href="https://ssl.jobcan.jp/employee/holidayworking" class="sub-menu-item">
+            <i class="material-icons" style="font-size: 16px;">today</i>
+            休日出勤申請
+          </a>
+        </div>
+      </div>
+      
+      <a href="https://ssl.jobcan.jp/employee/edit-info" class="quick-access-btn">
+        <i class="material-icons btn-icon">settings</i>
+        <span>スタッフ設定</span>
+      </a>
+    </div>
+  </div>
+
+ 
+
+  <div class="setting-group">
+    <h2 class="setting-section-title">Debug & Testing</h2>
+    
+    <div class="quick-access-grid">
+      <button id="testParticleBtn" class="quick-access-btn">
+        <i class="material-icons btn-icon">auto_fix_high</i>
+        <span>Test Particles</span>
+      </button>
+      
+      <button id="debugInfoBtn" class="quick-access-btn">
+        <i class="material-icons btn-icon">bug_report</i>
+        <span>Debug Info</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="setting-group">
+    <h2 class="setting-section-title">Display Settings</h2>
+    
+    <div class="setting-item">
+      <div class="setting-info">
+        <span class="setting-item-label">Dark Mode</span>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="darkMode">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    
+    <div class="setting-item">
+      <div class="setting-info">
+        <div class="setting-item-label">Clock Size</div>
+      </div>
+      <div class="setting-control radio-group">
+        <label class="radio-option">
+          <input type="radio" name="clockSize" value="small"> 
+          <span>S</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="clockSize" value="medium" checked> 
+          <span>M</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="clockSize" value="large"> 
+          <span>L</span>
+        </label>
+      </div>
+    </div>
+    
+    <div class="setting-item">
+      <div class="setting-info">
+        <div class="setting-item-label">Show Seconds</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="showSeconds" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    
+    <div class="setting-item">
+      <div class="setting-info">
+        <div class="setting-item-label">Work Progress Bar</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="showProgressBar" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="note">
+    Refresh page after changing settings to apply.
+  </div>
+  
+  <div class="footer">
+    Version 1.2.3
+  </div>
+
+  <div id="toast"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

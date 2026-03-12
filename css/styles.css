@@ -2205,11 +2205,11 @@
     --work-segment-boundary-gap: 9px;
     height: 20px;
     width: 100%;
-    background: linear-gradient(180deg, #475164 0%, #3f485b 100%);
+    background: linear-gradient(180deg, #d7dde5 0%, #c8d0da 100%);
     border-radius: 999px;
     overflow: hidden;
     position: relative;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(15, 23, 42, 0.12);
     margin-top: 0;
   }
 
@@ -2233,14 +2233,14 @@
   .jobcan-enhanced .work-schedule-segment.segment-working {
     background: linear-gradient(90deg, var(--color-work-segment-working-start) 0%, var(--color-work-segment-working-end) 100%);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.16),
-      0 0 0 1px rgba(255, 255, 255, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 0 0 1px rgba(255, 255, 255, 0.24),
       0 6px 14px rgba(14, 165, 164, 0.22);
   }
 
   .jobcan-enhanced .work-schedule-segment.segment-off {
-    background: linear-gradient(90deg, var(--color-work-segment-off-start) 0%, var(--color-work-segment-off-end) 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    background: linear-gradient(90deg, #aeb8c5 0%, #9ca8b8 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26);
   }
   
   .jobcan-enhanced .work-progress-percentage {
@@ -2258,13 +2258,13 @@
 
   .jobcan-enhanced .work-progress-inline-label {
     font-weight: 700;
-    color: #cfd7e3;
+    color: #465365;
     font-size: 11px;
   }
 
   .jobcan-enhanced .work-progress-inline-status {
     font-weight: 700;
-    color: #e6edf7;
+    color: #1f2a37;
     min-width: 0;
     text-align: center;
     white-space: nowrap;
@@ -2289,18 +2289,18 @@
     top: 5px;
     width: 1px;
     height: 8px;
-    background-color: rgba(237, 242, 247, 0.56);
+    background-color: rgba(54, 70, 90, 0.52);
     z-index: 6;
     border-radius: 999px;
-    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.18);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.32);
   }
 
   .jobcan-enhanced .work-punch-marker {
     width: var(--work-dot-normal-width);
     height: var(--work-dot-normal-height);
-    border: 2px solid rgba(255, 255, 255, 0.92);
+    border: 2px solid rgba(255, 255, 255, 0.96);
     border-radius: 999px;
-    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.2);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.16);
     cursor: pointer;
     z-index: 4;
     transition:
@@ -2321,7 +2321,7 @@
     border-radius: 999px;
     background: #ef4444;
     border: 2px solid rgba(255, 255, 255, 0.95);
-    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.24);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.2);
     z-index: 9;
     transition:
       width 0.18s ease,
@@ -2340,7 +2340,7 @@
     width: var(--work-dot-hover-size);
     height: var(--work-dot-hover-size);
     border-radius: 50%;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.14), 0 6px 16px rgba(15, 23, 42, 0.32);
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1), 0 6px 16px rgba(15, 23, 42, 0.22);
   }
 
   .jbe-punch-tooltip {

@@ -4214,7 +4214,7 @@
     grid-auto-flow: column;
     grid-auto-columns: minmax(26px, 1fr);
     align-items: stretch;
-    gap: 6px;
+    gap: 8px;
     overflow-x: auto;
     padding-bottom: 0;
     scrollbar-width: none;

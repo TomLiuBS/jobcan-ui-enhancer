@@ -118,6 +118,7 @@ function registerFloatingAction(options) {
 
   actionButton.title = title || '';
   actionButton.setAttribute('aria-label', title || id);
+  actionButton.dataset.title = title || id;
   actionButton.dataset.order = String(order);
   actionButton.innerHTML = icon || '';
   actionButton.onclick = (e) => {

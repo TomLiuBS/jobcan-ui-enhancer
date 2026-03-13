@@ -2509,6 +2509,42 @@
 
   .jobcan-fab-action {
     background: var(--color-secondary);
+    position: relative;
+    overflow: visible;
+  }
+
+  .jobcan-fab-action::after {
+    content: attr(data-title);
+    position: absolute;
+    right: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%) translateX(4px);
+    background: var(--color-gray-900);
+    color: var(--color-white);
+    border-radius: 999px;
+    padding: 7px 11px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 6px 18px var(--color-black-20);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+
+  .jobcan-enhanced body.dark-mode .jobcan-fab-action::after {
+    background: color-mix(in srgb, var(--color-card) 58%, var(--color-black) 42%);
+    color: #f5f7fb;
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, var(--color-white) 30%);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.38);
+  }
+
+  .jobcan-fab-action:hover::after,
+  .jobcan-fab-action:focus-visible::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
   }
 
   .jobcan-fab-main:hover,
@@ -4128,7 +4164,7 @@
     border: 1px solid color-mix(in srgb, var(--color-border) 80%, var(--color-primary) 20%);
     border-radius: var(--border-radius-sm);
     background: color-mix(in srgb, var(--color-background) 94%, var(--color-card) 6%);
-    padding: 10px 0 10px 10px;
+    padding: 10px;
     min-width: 0;
     position: relative;
     height: 100%;
@@ -4232,7 +4268,6 @@
     position: relative;
     cursor: pointer;
     opacity: 0.72;
-    margin-right: 10px;
   }
 
   .table-report-trend-scrollbar-thumb {
@@ -4646,7 +4681,7 @@
     min-width: 0;
     flex-wrap: wrap;
     padding: 8px 4px 2px;
-    min-height: 170px;
+    min-height: 120px;
   }
 
   .table-report-vbar-col {

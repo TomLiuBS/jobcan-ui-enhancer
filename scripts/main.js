@@ -166,6 +166,7 @@ function applyEnhancements() {
 
   // Request-list enhancements (休暇 / 残業 / 休日出勤): status badges + empty states
   if (isRequestListPage && typeof setupRequestStatusBadges === 'function') setupRequestStatusBadges();
+  if (isAttendancePage && typeof setupAttendanceChart === 'function') setupAttendanceChart();
   if (isRequestListPage && typeof setupRequestListEmptyState === 'function') setupRequestListEmptyState();
   if (isRequestListPage && typeof setupRequestHeaderActions === 'function') setupRequestHeaderActions();
 

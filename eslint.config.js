@@ -57,6 +57,7 @@ const crossFileGlobals = {
   captureManHourReport: 'readonly',
   // scripts/dataExtraction.js
   extractAndStoreCollapseInfoData: 'readonly',
+  fetchJobcanDocument: 'readonly',
   loadAttendanceData: 'readonly',
   loadPunchListData: 'readonly',
   setupCollapseInfoObserver: 'readonly',
@@ -72,6 +73,8 @@ const crossFileGlobals = {
   setupManHourEditPage: 'readonly',
   setupManHourListPage: 'readonly',
   setupRequestStatusBadges: 'readonly',
+  // scripts/attendanceChart.js
+  setupAttendanceChart: 'readonly',
   setupRequestListEmptyState: 'readonly',
   setupRequestHeaderActions: 'readonly',
   JBE_ManHourApi: 'readonly'

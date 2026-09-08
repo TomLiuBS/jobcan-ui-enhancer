@@ -225,7 +225,8 @@
   display: none !important;
 }
 
-.jobcan-enhanced #jbe-axis1-tabs {
+.jobcan-enhanced #jbe-axis1-tabs,
+.jobcan-enhanced .jbe-report-tabs {
   display: inline-flex;
   gap: 2px;
   padding: 3px;
@@ -742,6 +743,83 @@
   margin: 0;
   font-size: 17px;
   font-weight: 600;
+}
+
+/* Title + month navigator share the left half of the header; the close button
+   keeps the right. Wraps rather than squeezing the navigator on a narrow modal. */
+.jobcan-enhanced .jbe-report-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  min-width: 0;
+}
+
+.jobcan-enhanced .jbe-report-monthnav {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 999px;
+  background: var(--color-surface, #eef0f3);
+}
+
+.jobcan-enhanced .jbe-report-monthstep {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-secondary, #666);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.jobcan-enhanced .jbe-report-monthstep:hover:not(:disabled) {
+  background: var(--color-card, #fff);
+  color: var(--color-text-primary, #333);
+}
+
+.jobcan-enhanced .jbe-report-monthstep:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.jobcan-enhanced .jbe-report-month {
+  min-width: 66px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary, #333);
+}
+
+/* Only rendered while the report is off the month the table below is showing. */
+.jobcan-enhanced .jbe-report-month-reset {
+  margin-left: 4px;
+  padding: 3px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-card, #fff);
+  color: var(--color-primary, #0077ff);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.jobcan-enhanced .jbe-report-month-reset:hover {
+  background: var(--color-table-hover-bg, #f0f7ff);
+}
+
+.jobcan-enhanced .jbe-report-monthstep:focus-visible,
+.jobcan-enhanced .jbe-report-month-reset:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong, rgba(16, 159, 255, 0.42));
+  outline-offset: 1px;
 }
 
 .jobcan-enhanced .jbe-report-close {
@@ -1276,10 +1354,22 @@
   overflow: hidden;
 }
 
+/* The fill is a task stack, not a solid bar: buildProjectBars() appends one
+   `.jbe-report-bar-seg` per task using the same `.jbe-task-c*` colours the day
+   columns stack in. `--color-primary` stays as the fallback for a project with
+   no task breakdown. `overflow: hidden` keeps the square segments inside the
+   fill's own rounded right end. */
 .jobcan-enhanced .jbe-report-bar-fill {
+  display: flex;
   height: 100%;
   background: var(--color-primary, #0077ff);
   border-radius: 999px;
+  overflow: hidden;
+}
+
+.jobcan-enhanced .jbe-report-bar-seg {
+  height: 100%;
+  min-width: 1px;
 }
 
 /* Per-project per-day breakdown: a compact vertical bar graph inside each
@@ -1552,6 +1642,250 @@
   padding: 24px;
   text-align: center;
   color: var(--color-text-secondary, #888);
+}
+
+/* ------------------------------------------------------------------ */
+/* Report tabs: プロジェクト別 / クライアント別 / 推移                  */
+/* ------------------------------------------------------------------ */
+/* The strip borrows .jbe-axis-tab wholesale (the buttons carry both classes) so
+   the report's tabs and the 集計軸 tabs above the list cannot drift apart. */
+.jobcan-enhanced .jbe-report-tabs {
+  margin-bottom: 18px;
+}
+
+/* Bootstrap's reboot already sets [hidden]{display:none!important}, but this
+   extension must not depend on the host stylesheet for its own panels. */
+.jobcan-enhanced .jbe-report-panel[hidden] {
+  display: none !important;
+}
+
+/* --- クライアント別 ------------------------------------------------ */
+
+/* One 100%-width strip: the whole month split 直接 / 間接 / 瑕疵. It is the
+   headline of the tab, so it sits above the client rows, not inside them. */
+.jobcan-enhanced .jbe-report-catsummary {
+  margin: 0 0 20px;
+}
+
+.jobcan-enhanced .jbe-report-catbar {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--color-gray-200, #eceef1);
+}
+
+.jobcan-enhanced .jbe-report-catbar-seg {
+  height: 100%;
+  min-width: 2px;
+}
+
+.jobcan-enhanced .jbe-report-catstats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.jobcan-enhanced .jbe-report-catstat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+/* The swatch is .jbe-report-daybar-swatch, which is baseline-misaligned next to
+   text — nudge it onto the type's baseline rather than restyling the swatch. */
+.jobcan-enhanced .jbe-report-catstat .jbe-report-daybar-swatch {
+  align-self: center;
+}
+
+.jobcan-enhanced .jbe-report-catstat-name {
+  color: var(--color-text-secondary, #777);
+}
+
+.jobcan-enhanced .jbe-report-catstat-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.jobcan-enhanced .jbe-report-catstat-pct {
+  color: var(--color-text-secondary, #999);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A client's projects, in the same row shape as the client itself, one size down. */
+.jobcan-enhanced .jbe-report-sublist {
+  padding-top: 8px;
+  padding-bottom: 2px;
+}
+
+.jobcan-enhanced .jbe-report-subrow {
+  margin-bottom: 9px;
+}
+
+.jobcan-enhanced .jbe-report-subrow .jbe-report-bar-head {
+  font-size: 12px;
+  margin-bottom: 3px;
+  color: var(--color-text-secondary, #777);
+}
+
+.jobcan-enhanced .jbe-report-subrow .jbe-report-bar-track {
+  height: 5px;
+}
+
+/* Category colours. 直接 is the primary blue the project bars already use; 間接
+   and 瑕疵 take teal and amber from the task palette. They stay clear of the
+   danger red the 未入力 / 不一致 day flags own. */
+.jobcan-enhanced .jbe-cat-direct { background: #3b82f6; }
+.jobcan-enhanced .jbe-cat-indirect { background: #14b8a6; }
+.jobcan-enhanced .jbe-cat-defect { background: #f59e0b; }
+.jobcan-enhanced .jbe-cat-unknown { background: var(--color-gray-400, #9aa3ad); }
+
+/* --- 推移 ---------------------------------------------------------- */
+
+/* Six wide columns instead of a month of thin ones: same markup and the same
+   .jbe-report-daybar-* rules as the per-day chart, resized here. */
+/* The day chart fixes the whole column's height; here the BAR is fixed and the
+   month label adds its own height on top. A fixed container height left the label
+   overflowing by a sub-pixel, and `overflow-x: auto` turns that into a vertical
+   scrollbar down the side of the chart. */
+.jobcan-enhanced .jbe-report-trend-chart {
+  height: auto;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding-top: 12px;
+  /* Six flexible columns always fit, so nothing here needs to scroll — and the
+     day chart's `overflow-x: auto` computes overflow-y to `auto` too, which turned
+     a sub-pixel rounding of the label height into a scrollbar down the side. */
+  overflow: visible;
+}
+
+.jobcan-enhanced .jbe-report-trend-chart .jbe-report-daybar-col {
+  flex: 1 1 0;
+  min-width: 48px;
+}
+
+.jobcan-enhanced .jbe-report-trend-chart .jbe-report-daybar-bar {
+  flex: 0 0 132px;
+}
+
+.jobcan-enhanced .jbe-report-trend-chart .jbe-report-daybar-fill {
+  width: 62%;
+  max-width: 44px;
+  border-radius: 4px 4px 0 0;
+}
+
+.jobcan-enhanced .jbe-report-trend-chart .jbe-report-daybar-value {
+  font-size: 11px;
+}
+
+.jobcan-enhanced .jbe-report-trend-chart .jbe-report-daybar-label {
+  font-size: 12px;
+}
+
+/* The month the list is currently showing, so the newest column is not read as
+   just another bar. */
+.jobcan-enhanced .jbe-report-trend-chart .jbe-report-daybar-col.is-current .jbe-report-daybar-label,
+.jobcan-enhanced .jbe-report-trend-chart .jbe-report-daybar-col.is-current .jbe-report-daybar-value {
+  color: var(--color-text-primary, #222);
+  font-weight: 600;
+}
+
+/* Clients down the side, months across. Long client names truncate; the cells
+   never wrap, so the table scrolls inside its own box instead of stretching the
+   modal. */
+.jobcan-enhanced .jbe-report-matrix-scroll {
+  overflow-x: auto;
+}
+
+.jobcan-enhanced .jbe-report-matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.jobcan-enhanced .jbe-report-matrix th,
+.jobcan-enhanced .jbe-report-matrix td {
+  padding: 6px 8px;
+  white-space: nowrap;
+  text-align: right;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.jobcan-enhanced .jbe-report-matrix thead th {
+  color: var(--color-text-secondary, #888);
+  font-weight: 600;
+}
+
+/* The corner cell labels the row headers under it, so it follows their alignment
+   rather than the numeric columns'. */
+.jobcan-enhanced .jbe-report-matrix thead th:first-child {
+  text-align: left;
+}
+
+.jobcan-enhanced .jbe-report-matrix tbody th {
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  font-weight: 500;
+}
+
+.jobcan-enhanced .jbe-report-matrix thead th.is-current {
+  color: var(--color-primary, #0077ff);
+}
+
+.jobcan-enhanced .jbe-report-matrix td.is-zero {
+  color: var(--color-text-secondary, #b8bfc7);
+}
+
+.jobcan-enhanced .jbe-report-matrix td.is-total,
+.jobcan-enhanced .jbe-report-matrix tr.is-total td,
+.jobcan-enhanced .jbe-report-matrix tr.is-total th {
+  font-weight: 600;
+}
+
+.jobcan-enhanced .jbe-report-matrix tr.is-total th,
+.jobcan-enhanced .jbe-report-matrix tr.is-total td {
+  border-bottom: 0;
+}
+
+/* Loading / error / footnote states for the fetched tab. */
+.jobcan-enhanced .jbe-report-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 34px 12px;
+  color: var(--color-text-secondary, #888);
+  font-size: 13px;
+}
+
+.jobcan-enhanced .jbe-report-status.is-error {
+  color: var(--color-danger, #DC3545);
+}
+
+.jobcan-enhanced .jbe-report-retry {
+  padding: 5px 14px;
+  border: 1px solid var(--color-border, #d6dae0);
+  border-radius: 999px;
+  background: var(--color-card, #fff);
+  color: var(--color-text-primary, #333);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.jobcan-enhanced .jbe-report-retry:hover {
+  background: var(--color-table-hover-bg, #f0f7ff);
+}
+
+.jobcan-enhanced .jbe-report-note {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--color-text-secondary, #999);
 }
 
 /* ------------------------------------------------------------------ */
@@ -2307,3 +2641,435 @@
   background-color: currentColor;
   box-shadow: 0 -5px 0 currentColor, 0 5px 0 currentColor;
 }
+
+/* ------------------------------------------------------------------ */
+/* 出勤簿 (/employee/attendance) — 労働時間の推移                       */
+/* ------------------------------------------------------------------ */
+/* Lives here, not in styles.css, because it is built out of the same pieces as
+   the man-hour report's day chart: `.jbe-report-daybar-seg` for the stack and
+   `.jbe-report-daybar-legend` / `-swatch` for the key. Keeping the derivation next
+   to what it derives from is what makes the coupling visible — restyling a
+   segment restyles both charts, and that is the intent.
+
+   Built by scripts/attendanceChart.js from the page's own table. The bars and the
+   day labels are two parallel flex rows rather than one row of stacked columns:
+   that gives the plot a coordinate space of its own, so the 平均 line can be a
+   plain `bottom: N%` that cannot drift away from the fills. */
+.jobcan-enhanced .jbe-att-chart {
+  position: relative;
+  margin: 0 0 18px;
+  padding: 14px 16px 10px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--color-card, #fff);
+}
+
+.jobcan-enhanced .jbe-att-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin-bottom: 14px;
+}
+
+.jobcan-enhanced .jbe-att-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary, #222);
+}
+
+.jobcan-enhanced .jbe-att-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+
+.jobcan-enhanced .jbe-att-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.jobcan-enhanced .jbe-att-stat-label {
+  color: var(--color-text-secondary, #888);
+}
+
+.jobcan-enhanced .jbe-att-stat-value {
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary, #0077ff);
+}
+
+.jobcan-enhanced .jbe-att-stat-detail {
+  color: var(--color-text-secondary, #9aa3ad);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The legend was laid out with `margin-left: auto` for the report modal's title
+   row; here the stats already occupy that space. */
+.jobcan-enhanced .jbe-att-head .jbe-report-daybar-legend {
+  margin-left: auto;
+}
+
+.jobcan-enhanced .jbe-att-plot {
+  position: relative;
+  height: 132px;
+}
+
+.jobcan-enhanced .jbe-att-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 100%;
+}
+
+/* A column is an <a> to that day's 打刻修正 when the row offers one, so it has to
+   shed Bootstrap's anchor colour and underline. */
+.jobcan-enhanced .jbe-att-col {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.jobcan-enhanced a.jbe-att-col,
+.jobcan-enhanced a.jbe-att-label {
+  cursor: pointer;
+}
+
+.jobcan-enhanced a.jbe-att-col:hover,
+.jobcan-enhanced a.jbe-att-label:hover {
+  text-decoration: none;
+}
+
+/* The stack, bottom-up. No `overflow: hidden`: the value label sits above the
+   fill at `bottom: 100%` and would be clipped — the top segment rounds itself
+   instead (column-reverse makes the last child the topmost one). */
+.jobcan-enhanced .jbe-att-fill {
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  width: 74%;
+  max-width: 22px;
+  min-height: 2px;
+  border-radius: 3px 3px 0 0;
+  background: var(--color-primary, #0077ff);
+}
+
+.jobcan-enhanced .jbe-att-fill.is-empty {
+  height: 2px;
+  background: var(--color-gray-300, #d7dbe0);
+  opacity: 0.7;
+}
+
+.jobcan-enhanced .jbe-att-col.is-off .jbe-att-fill.is-empty {
+  opacity: 0.4;
+}
+
+/* A 休暇 day is accounted for rather than missing, so it gets the report's hollow
+   dotted marker instead of a fill it has no hours for. */
+.jobcan-enhanced .jbe-att-col.is-leave .jbe-att-fill.is-empty {
+  height: 7px;
+  background: transparent;
+  opacity: 1;
+  border-radius: 2px;
+  outline: 1.5px dotted var(--color-primary, #0077ff);
+  outline-offset: 1px;
+}
+
+.jobcan-enhanced .jbe-report-daybar-swatch.is-leave {
+  background: transparent;
+  border-radius: 3px;
+  border: 1.5px dotted var(--color-primary, #0077ff);
+}
+
+/* Hours printed above each bar. At 31 columns these are tight, so they are sized
+   to the narrowest case and allowed to sit slightly outside their column. */
+.jobcan-enhanced .jbe-att-value {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 3px;
+  font-size: 9px;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--color-text-secondary, #888);
+  font-variant-numeric: tabular-nums;
+}
+
+.jobcan-enhanced .jbe-att-col.is-today .jbe-att-value {
+  color: var(--color-primary, #0077ff);
+  font-weight: 700;
+}
+
+/* One hue, two values. シフト外 is the same blue lightened rather than a second
+   colour: it is more of the same thing, not a different kind of hour, and a warm
+   accent up there competed with the 未入力 / 不一致 flags elsewhere in the UI. */
+.jobcan-enhanced .jbe-att-c-inshift { background: #3b82f6; }
+.jobcan-enhanced .jbe-att-c-outside { background: #93c5fd; }
+
+/* The 定時 (8h) reference across the plot. Neutral: the colour in this chart
+   belongs to the data. */
+.jobcan-enhanced .jbe-att-ref {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.jobcan-enhanced .jbe-att-ref.is-standard {
+  border-top: 1px solid var(--color-text-secondary, #9aa3ad);
+  opacity: 0.85;
+}
+
+/* Named in the legend rather than on the line — see render() in
+   scripts/attendanceChart.js. Each swatch is drawn with the line's own stroke, so
+   the key cannot drift from what is on the plot. */
+.jobcan-enhanced .jbe-report-daybar-swatch.is-standard {
+  height: 0;
+  background: transparent;
+  border-radius: 0;
+  border-top: 1.5px solid var(--color-text-secondary, #9aa3ad);
+}
+
+/* --- hover card --- */
+/* Positioned by attachHover() in scripts/attendanceChart.js: it flips to whichever
+   side of the hovered column has room. `pointer-events: none` keeps it from
+   stealing the hover that summoned it. */
+.jobcan-enhanced .jbe-att-tip {
+  position: absolute;
+  z-index: 3;
+  min-width: 152px;
+  max-width: 230px;
+  padding: 9px 11px 10px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  background: var(--color-card, #fff);
+  box-shadow: var(--shadow-modal, 0 8px 24px rgba(0, 0, 0, 0.16));
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--color-text-primary, #222);
+  pointer-events: none;
+}
+
+.jobcan-enhanced .jbe-att-tip[hidden] {
+  display: none !important;
+}
+
+.jobcan-enhanced .jbe-att-tip-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.jobcan-enhanced .jbe-att-tip-date {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.jobcan-enhanced .jbe-att-tip-badge {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--color-gray-100, #f1f3f5);
+  color: var(--color-text-secondary, #777);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.jobcan-enhanced .jbe-att-tip-badge.is-active {
+  background: var(--color-primary, #0077ff);
+  color: #fff;
+}
+
+.jobcan-enhanced .jbe-att-tip-main {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+.jobcan-enhanced .jbe-att-tip-big {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Neutral by design: a long day is a fact, not a verdict. */
+.jobcan-enhanced .jbe-att-tip-delta {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary, #888);
+}
+
+.jobcan-enhanced .jbe-att-tip-delta.is-over {
+  color: var(--color-primary, #0077ff);
+}
+
+.jobcan-enhanced .jbe-att-tip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.jobcan-enhanced .jbe-att-tip-name {
+  color: var(--color-text-secondary, #888);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The amount is pushed to the right edge, so the column of figures lines up
+   however long the labels are. */
+.jobcan-enhanced .jbe-att-tip-amount {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.jobcan-enhanced .jbe-att-tip-swatch {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.jobcan-enhanced .jbe-att-tip-foot {
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid var(--color-border, #eceef1);
+  color: var(--color-text-secondary, #888);
+}
+
+/* 工数入力状況, and only when something is owed. It is a tinted banner rather
+   than another quiet label=value row: it sits directly under the headline and has
+   to survive being read at a glance, halfway through moving the mouse. The
+   warning / danger pairs are the same ones the man-hour report's day flags use,
+   and the *-bg tokens are alpha over the card, so one definition covers both
+   themes. */
+.jobcan-enhanced .jbe-att-tip-flag {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  border-left: 3px solid transparent;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.jobcan-enhanced .jbe-att-tip-flag-amount {
+  margin-left: auto;
+}
+
+.jobcan-enhanced .jbe-att-tip-flag.is-missing {
+  border-left-color: var(--color-warning, #eb9800);
+  background: var(--color-warning-bg, rgba(243, 156, 18, 0.12));
+  color: var(--color-warning-dark, #dd8c00);
+}
+
+.jobcan-enhanced .jbe-att-tip-flag.is-mismatch {
+  border-left-color: var(--color-danger, #DC3545);
+  background: var(--color-danger-bg, rgba(231, 76, 60, 0.12));
+  color: var(--color-danger, #DC3545);
+}
+
+.jobcan-enhanced .jbe-att-tip-none {
+  color: var(--color-text-secondary, #999);
+}
+
+/* The hovered column lifts out of the row; the rest are left alone rather than
+   dimmed, so the shape of the month stays readable while you point at one day. */
+.jobcan-enhanced .jbe-att-col.is-hover .jbe-att-fill {
+  filter: brightness(1.12);
+  outline: 1.5px solid var(--color-primary, #0077ff);
+  outline-offset: 1.5px;
+}
+
+.jobcan-enhanced .jbe-att-col.is-hover .jbe-att-value {
+  color: var(--color-text-primary, #222);
+  font-weight: 700;
+}
+
+.jobcan-enhanced .jbe-att-col:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong, rgba(16, 159, 255, 0.42));
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+
+.jobcan-enhanced .jbe-att-label.is-hover {
+  color: var(--color-text-primary, #222);
+  font-weight: 700;
+  opacity: 1;
+}
+
+/* x-axis: a second flex row with the same column sizing, so a label always lands
+   under its own bar without either row knowing the other's contents. */
+.jobcan-enhanced .jbe-att-labels {
+  display: flex;
+  gap: 2px;
+  margin-top: 7px;
+}
+
+.jobcan-enhanced .jbe-att-label {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--color-text-secondary, #999);
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.jobcan-enhanced .jbe-att-label.is-off {
+  opacity: 0.6;
+}
+
+.jobcan-enhanced .jbe-att-label.is-today {
+  color: var(--color-primary, #0077ff);
+  font-weight: 700;
+  opacity: 1;
+}
+
+.jobcan-enhanced .jbe-att-label-dow {
+  font-size: 9px;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.jobcan-enhanced .jbe-att-label-dow.is-weekend {
+  color: var(--color-danger, #DC3545);
+  opacity: 0.9;
+}
+
+/* Set by applyDensity() in scripts/attendanceChart.js from the measured column
+   width — a window-width media query cannot see how wide this chart's container
+   actually is. */
+.jobcan-enhanced .jbe-att-chart.is-dense .jbe-att-value {
+  display: none;
+}
+
+.jobcan-enhanced .jbe-att-chart.is-tight .jbe-att-label-dow {
+  display: none;
+}
+
+/* Narrower still and even the day numbers run together, so thin them to every
+   fifth. `visibility` rather than `display`, so the columns keep their widths and
+   stay in step with the bars above. */
+.jobcan-enhanced .jbe-att-chart.is-tight .jbe-att-label:not(:nth-child(5n + 1)) .jbe-att-label-day {
+  visibility: hidden;
+}
+

@@ -49,6 +49,7 @@
         "scripts/overlay.js",
         "scripts/manHourEdit.js",
         "scripts/manHourList.js",
+    "scripts/attendanceChart.js",
         "scripts/requestStatus.js",
         "scripts/emptyState.js",
         "scripts/requestHeader.js",

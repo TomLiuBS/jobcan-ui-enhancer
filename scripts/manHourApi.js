@@ -51,8 +51,20 @@
 
   const toUnixSec = (value) => Math.floor(toDate(value).getTime() / 1000);
 
+  // Jobcan's own workers append `token=<#token text>` to every GET on this API
+  // (docs/jobcan-endpoints.md). The endpoints wrapped here have been observed to
+  // answer on the session cookie alone, but sending the token matches what the
+  // page does and costs nothing when it is ignored. Read per call — the list page
+  // is an SPA and the node can be replaced under us.
+  function pageToken() {
+    const el = document.getElementById('token');
+    return el ? String(el.textContent || '').trim() : '';
+  }
+
   async function jsonFetch(path) {
-    const res = await fetch(`${API_BASE}${path}`, {
+    const token = pageToken();
+    const url = `${API_BASE}${path}${token ? `${path.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}` : ''}`;
+    const res = await fetch(url, {
       credentials: 'include',
       headers: { Accept: 'application/json' }
     });
@@ -72,14 +84,37 @@
     return (res && Array.isArray(res.data)) ? res.data : [];
   }
 
+  // get-achievements-kinds-in-period answers for a DEFINED man-hour period, not
+  // "any data in this range": a month with no period yet returns [] (measured —
+  // 2026-08 returned [] while 2026-07 and 2026-06 each returned the 2 kinds, and a
+  // multi-month window also returned []). Kind ids are stable dimension
+  // definitions, so an earlier month's id is valid for a current-month date —
+  // walk back until one answers. manHourEditSearch.js does the same for the same
+  // reason; without it resolveKinds() silently yields nulls on the 1st of a fresh
+  // month, exactly when a timesheet is being filled.
+  const KIND_LOOKBACK_MONTHS = 3;
+
+  async function getKindsWithLookback(refDate) {
+    const ref = toDate(refDate || new Date());
+    for (let back = 0; back <= KIND_LOOKBACK_MONTHS; back += 1) {
+      const from = new Date(ref.getFullYear(), ref.getMonth() - back, 1);
+      const to = new Date(ref.getFullYear(), ref.getMonth() - back + 1, 1);
+      let kinds = [];
+      try {
+        kinds = await getKinds(from, to);
+      } catch (e) {
+        kinds = [];
+      }
+      if (kinds.length) return kinds;
+    }
+    return [];
+  }
+
   // Resolves and caches the project/task kind ids around a reference date.
   let _kindCache = null;
   async function resolveKinds(refDate) {
     if (_kindCache) return _kindCache;
-    const ref = toDate(refDate || new Date());
-    const from = new Date(ref.getFullYear(), ref.getMonth(), 1);
-    const to = new Date(ref.getFullYear(), ref.getMonth() + 1, 1);
-    const kinds = await getKinds(from, to);
+    const kinds = await getKindsWithLookback(refDate);
     // Order is authoritative (project first, task second); also key by the
     // %project%/%task% name tokens as a fallback.
     const byToken = (token) => kinds.find((k) => String(k.name || '').includes(token));
@@ -170,6 +205,114 @@
     return (res && res.data) ? res.data : res;
   }
 
+  // ---- Whole-kind unit maps (the reliable name lookup) ----------------------
+  //
+  // manHourEditSearch.js pre-warms the FULL unit list for every kind on each
+  // man-hour page load — the achievement-list page included — and caches it in
+  // localStorage as { t, date, d: { ulid: "(code)name" } }. It runs in the MAIN
+  // world, but localStorage is per-origin, so the isolated world reads the map the
+  // picker already paid for: on a warm cache this resolves every unit id for free.
+  //
+  // Cold, we walk the same cursor-paginated endpoint ourselves (~9 requests /
+  // ~3s on a real account, measured in manHourEditSearch.js). We deliberately do
+  // NOT write the result back: that cache is keyed by kind alone with the date it
+  // was built for kept as a revalidation hint, and seeding it from here for a
+  // different date would feed the edit page's picker units that are not selectable
+  // on the day being edited.
+  const UNIT_LIST_CACHE_PREFIX = 'jbe_mh_units_v2:';
+
+  function readSharedUnitCache(kid) {
+    let raw;
+    try {
+      raw = localStorage.getItem(`${UNIT_LIST_CACHE_PREFIX}${kid}`);
+    } catch (e) {
+      return null;
+    }
+    if (!raw) return null;
+    let record;
+    try {
+      record = JSON.parse(raw);
+    } catch (e) {
+      return null;
+    }
+    const map = record && record.d;
+    return (map && typeof map === 'object' && Object.keys(map).length) ? map : null;
+  }
+
+  const _kindUnitCache = {};
+
+  // Returns { ulid: label } for every unit of one kind. Empty when the kind id is
+  // unknown or the endpoint answers nothing — callers fall back, they do not fail.
+  async function getKindUnitLabels(kid, date) {
+    if (!kid) return {};
+    if (_kindUnitCache[kid]) return _kindUnitCache[kid];
+    const shared = readSharedUnitCache(kid);
+    if (shared) {
+      _kindUnitCache[kid] = shared;
+      return shared;
+    }
+    let items = [];
+    try {
+      items = await getAllUnits({ kid, date: date || new Date() });
+    } catch (e) {
+      items = [];
+    }
+    const map = {};
+    items.forEach((item) => { if (item && item.id) map[item.id] = item.label; });
+    if (Object.keys(map).length) _kindUnitCache[kid] = map;
+    return map;
+  }
+
+  // getUnits() returns whatever shape the backend feels like — the autocomplete
+  // endpoint answers `{ ulid: "(code)name" }`, and the unit endpoints in
+  // docs/jobcan-endpoints.md are described only as "resolve ids -> units". So
+  // normalise here rather than at each call site: accepts a map of id -> string,
+  // a map of id -> record, or an array of records, and always returns a flat
+  // `{ ulid: label }`. Kept as the *residual* lookup only: a project that has since
+  // expired is no longer in the whole-kind list above, and this is the only way to
+  // put a name to it. Ids that do not resolve are simply absent.
+  const UNIT_CHUNK = 100;
+
+  function unitLabelOf(value) {
+    if (value == null) return '';
+    if (typeof value === 'string') return value.trim();
+    if (typeof value === 'object') {
+      const label = value.label || value.name || value.unit_name || value.title || '';
+      const code = value.code || value.unit_code || '';
+      const text = String(label).trim();
+      if (!text) return '';
+      return code && !text.startsWith('(') ? `(${code})${text}` : text;
+    }
+    return String(value).trim();
+  }
+
+  async function getUnitLabels(ulids) {
+    const list = Array.from(new Set((Array.isArray(ulids) ? ulids : [ulids]).filter(Boolean)));
+    const out = {};
+    for (let i = 0; i < list.length; i += UNIT_CHUNK) {
+      const chunk = list.slice(i, i + UNIT_CHUNK);
+      let data;
+      try {
+        data = await getUnits(chunk);
+      } catch (e) {
+        continue;
+      }
+      if (Array.isArray(data)) {
+        data.forEach((rec) => {
+          const id = rec && (rec.id || rec.unit_id);
+          const label = unitLabelOf(rec);
+          if (id && label) out[id] = label;
+        });
+      } else if (data && typeof data === 'object') {
+        Object.keys(data).forEach((id) => {
+          const label = unitLabelOf(data[id]);
+          if (label) out[id] = label;
+        });
+      }
+    }
+    return out;
+  }
+
   // ---- Shared helpers exposed for the feature modules -----------------------
 
   // "(2605AaVz0369-01)瑕疵/..." -> { code: "2605AaVz0369-01", name: "瑕疵/..." }
@@ -193,6 +336,7 @@
     toYmd,
     toUnixSec,
     getKinds,
+    getKindsWithLookback,
     resolveKinds,
     kindIdForSeries,
     getAchievements,
@@ -201,9 +345,14 @@
     autocompleteUnits,
     getAllUnits,
     getUnits,
+    getKindUnitLabels,
+    getUnitLabels,
     parseUnitLabel,
     secondsToHHMM,
     secondsToMinutes,
-    _clearKindCache() { _kindCache = null; }
+    _clearKindCache() {
+      _kindCache = null;
+      Object.keys(_kindUnitCache).forEach((kid) => { delete _kindUnitCache[kid]; });
+    }
   };
 })();

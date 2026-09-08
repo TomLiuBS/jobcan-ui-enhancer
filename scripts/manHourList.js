@@ -12,7 +12,8 @@
 //   * waits for the worker-rendered rows before enhancing
 //   * filter buttons: すべて / 工数不一致 / レポート
 //   * highlights days whose 工数実績 (合計) differs from 総労働時間
-//   * a report modal with KPIs and per-project / per-task aggregates
+//   * a report modal with KPIs and per-project / per-task aggregates, with a
+//     month navigator that reads other months over the API without leaving the page
 
 (function () {
   if (window.__jbe_manHourListModuleReady) return;
@@ -655,8 +656,14 @@
 
   // --- report ----------------------------------------------------------------
 
-  function aggregate(days) {
+  // `options.hasWorkTime === false` means 総労働時間 is unknown for these days: the
+  // man-hour API does not carry it, so a fetched month whose 出勤簿 request failed
+  // has entry-side numbers only. Computing 不一致 / 未入力 against a zero would flag
+  // every worked day, so those are left out instead — see buildKpis.
+  function aggregate(days, options) {
+    const hasWorkTime = !options || options.hasWorkTime !== false;
     const agg = {
+      hasWorkTime,
       projectTotals: {},
       // Task names are the same dimension across projects (デザイン, その他 …), so
       // one colour per task holds for the whole report and the legend can live
@@ -680,8 +687,8 @@
 
     days.forEach((day) => {
       if (day.workMinutes) agg.totalWork += day.workMinutes;
-      const mismatch = dayIsMismatch(day);
-      const missing = dayIsMissing(day);
+      const mismatch = hasWorkTime && dayIsMismatch(day);
+      const missing = hasWorkTime && dayIsMissing(day);
       if (mismatch) agg.mismatchDays += 1;
       const dayEntryMinutes = day.entries.reduce((sum, e) => sum + e.minutes, 0);
       if (dayEntryMinutes > 0) agg.activeDays += 1; else agg.noInputDays += 1;
@@ -721,14 +728,6 @@
     });
 
     return agg;
-  }
-
-  function getMonthLabel() {
-    const form = document.getElementById('search');
-    const year = form ? (form.querySelector('[name="year"]') || {}).value : '';
-    const month = form ? (form.querySelector('[name="month"]') || {}).value : '';
-    if (year && month) return `${year}/${String(month).padStart(2, '0')}`;
-    return '';
   }
 
   function makeKpi(label, value, detail) {
@@ -797,6 +796,20 @@
       const fill = document.createElement('div');
       fill.className = 'jbe-report-bar-fill';
       fill.style.width = `${Math.max(2, (agg.projectTotals[project] / max) * 100)}%`;
+      // Segment the fill by task in the same colours the detail columns stack in,
+      // so the collapsed row already reads as the breakdown it expands into. A
+      // single-task project just ends up a solid bar in that task's colour;
+      // taskNames is sorted largest-first, matching the stack order below.
+      const projectMinutes = agg.projectTotals[project];
+      if (projectMinutes > 0) {
+        taskNames.forEach((task) => {
+          const seg = document.createElement('div');
+          seg.className = `jbe-report-bar-seg ${taskColors[task] || 'jbe-task-c1'}`;
+          seg.style.width = `${(tasks[task] / projectMinutes) * 100}%`;
+          seg.title = `${task}: ${minutesToHHMM(tasks[task])}`;
+          fill.appendChild(seg);
+        });
+      }
       track.appendChild(fill);
 
       const main = document.createElement('div');
@@ -845,6 +858,9 @@
   const WEEKDAY_BY_CLASS = { sun: '日', mon: '月', tue: '火', wed: '水', thu: '木', fri: '金', sat: '土' };
 
   function weekdayLabel(day) {
+    // A day built from the API (another month — see loadApiMonth) has no cell and
+    // carries its 曜日 outright, computed from the real date.
+    if (day && day.weekday) return day.weekday;
     const cell = day && day.dateCell;
     if (cell) {
       const hit = Object.keys(WEEKDAY_BY_CLASS).find((c) => cell.classList.contains(c));
@@ -979,11 +995,1161 @@
     return item;
   }
 
+  // --- project taxonomy: category / client -----------------------------------
+  //
+  // Project labels are path-like and carry their own taxonomy in front of the
+  // client: "アサイン/スマートリングアプリSHAPE/デザイン制作" is direct work for
+  // アサイン, "【間接】事業部業務" is overhead with no client at all, and
+  // "瑕疵/LDH JAPAN/…" is warranty work for LDH JAPAN. Pulling that apart is what
+  // turns a list of long paths into a 直接/間接 ratio and a per-client total.
+  //
+  // The 【...】 rule is generic — any bracket tag becomes the category — but a bare
+  // leading category segment has to be listed, and 瑕疵 is the only one observed on
+  // this account. An unlisted one just reads as a client, which is the safe failure.
+  const CATEGORY_SEGMENTS = ['瑕疵'];
+  const DIRECT_CATEGORY = '直接';
+  // Minutes whose project name could not be resolved (推移 only — see loadTrend).
+  const UNRESOLVED_CATEGORY = '未分類';
+
+  const CATEGORY_CLASS = {
+    '直接': 'jbe-cat-direct',
+    '間接': 'jbe-cat-indirect',
+    '瑕疵': 'jbe-cat-defect',
+    '未分類': 'jbe-cat-unknown'
+  };
+  // Categories outside the known set cycle the task palette rather than all
+  // collapsing onto one colour; the legend names them either way.
+  const CATEGORY_FALLBACK = ['jbe-task-c3', 'jbe-task-c5', 'jbe-task-c6', 'jbe-task-c7', 'jbe-task-c8'];
+
+  function splitPath(name) {
+    return String(name || '').split('/').map((part) => part.trim()).filter(Boolean);
+  }
+
+  function classifyProject(name) {
+    const text = String(name || '').trim();
+    const bracket = text.match(/^【\s*([^】]+?)\s*】\s*([\s\S]*)$/);
+    if (bracket) {
+      const rest = bracket[2].trim();
+      return { category: bracket[1], client: '', detail: rest || text };
+    }
+    const parts = splitPath(text);
+    if (parts.length && CATEGORY_SEGMENTS.indexOf(parts[0]) !== -1) {
+      return { category: parts[0], client: parts[1] || '', detail: parts.slice(2).join(' / ') || parts[1] || text };
+    }
+    return { category: DIRECT_CATEGORY, client: parts[0] || text, detail: parts.slice(1).join(' / ') || text };
+  }
+
+  // ベネッセ and ベネッセコーポレーション are one client spelled two ways, and they
+  // must not show up as two rows splitting one client's hours. Strip the legal-form
+  // and corporate-suffix tokens and the two collapse to the same key — nothing else
+  // is merged, so アサイン and (say) アサインナビ stay apart. Order matters: the
+  // longer tokens have to go first or "co." leaves a stray "., ltd.".
+  const CORP_TOKENS = [
+    'コーポレーション', 'ホールディングス', 'ホールディング', 'カンパニー', 'グループ',
+    '株式会社', '有限会社', '合同会社', '（株）', '(株)', '（有）', '(有)',
+    'co.,ltd.', 'co., ltd.', 'inc.', 'inc', 'corp.', 'corp', 'co.', 'ltd.', 'ltd', 'llc'
+  ];
+
+  function normalizeClient(name) {
+    const raw = String(name || '').trim();
+    let text = raw.toLowerCase();
+    CORP_TOKENS.forEach((token) => { text = text.split(token).join(''); });
+    text = text.replace(/[\s・,，.。]/g, '');
+    // A client actually named after a legal form would strip to nothing; keep the
+    // original rather than merging every such name into one empty key.
+    return text || raw.toLowerCase();
+  }
+
+  // 直接 leads, 未分類 trails, everything else by size — so the ratio reads the same
+  // way in the stacked strip, the legend and the trend columns.
+  function sortCategories(totals) {
+    return Object.keys(totals).sort((a, b) => {
+      if (a === b) return 0;
+      if (a === DIRECT_CATEGORY) return -1;
+      if (b === DIRECT_CATEGORY) return 1;
+      if (a === UNRESOLVED_CATEGORY) return 1;
+      if (b === UNRESOLVED_CATEGORY) return -1;
+      return totals[b] - totals[a];
+    });
+  }
+
+  function categoryClassMap(categories) {
+    const map = {};
+    let fallback = 0;
+    categories.forEach((name) => {
+      if (CATEGORY_CLASS[name]) {
+        map[name] = CATEGORY_CLASS[name];
+      } else {
+        map[name] = CATEGORY_FALLBACK[fallback % CATEGORY_FALLBACK.length];
+        fallback += 1;
+      }
+    });
+    return map;
+  }
+
+  // A track whose fill is stacked by category, in the same colours the summary
+  // strip and the trend columns use. `total` scales the fill against the biggest
+  // row; the segments then split the fill itself.
+  function buildCategoryTrack(byCategory, minutes, max, classes) {
+    const track = document.createElement('div');
+    track.className = 'jbe-report-bar-track';
+    const fill = document.createElement('div');
+    fill.className = 'jbe-report-bar-fill';
+    fill.style.width = `${Math.max(2, (minutes / (max || 1)) * 100)}%`;
+    if (minutes > 0) {
+      sortCategories(byCategory).forEach((category) => {
+        const seg = document.createElement('div');
+        seg.className = `jbe-report-bar-seg ${classes[category] || 'jbe-cat-unknown'}`;
+        seg.style.width = `${(byCategory[category] / minutes) * 100}%`;
+        seg.title = `${category}: ${minutesToHHMM(byCategory[category])}`;
+        fill.appendChild(seg);
+      });
+    }
+    track.appendChild(fill);
+    return track;
+  }
+
+  // --- クライアント別 ---------------------------------------------------------
+
+  function aggregateClients(agg) {
+    const groups = {};
+    const order = [];
+    const categoryTotals = {};
+    let total = 0;
+
+    Object.keys(agg.projectTotals).forEach((project) => {
+      const minutes = agg.projectTotals[project];
+      const info = classifyProject(project);
+      categoryTotals[info.category] = (categoryTotals[info.category] || 0) + minutes;
+      total += minutes;
+      // Overhead has no client of its own, so the category stands in as the group —
+      // 【間接】 becomes one row holding every 間接 project.
+      const display = info.client || `【${info.category}】`;
+      const key = info.client ? `c:${normalizeClient(info.client)}` : `k:${info.category}`;
+      if (!groups[key]) {
+        groups[key] = { name: display, variants: {}, minutes: 0, byCategory: {}, projects: [] };
+        order.push(key);
+      }
+      const group = groups[key];
+      group.minutes += minutes;
+      group.variants[display] = (group.variants[display] || 0) + minutes;
+      group.byCategory[info.category] = (group.byCategory[info.category] || 0) + minutes;
+      group.projects.push({ name: project, detail: info.detail, category: info.category, minutes });
+    });
+
+    const list = order.map((key) => groups[key]);
+    list.forEach((group) => {
+      // The spelling that carries the most hours becomes the label; the merged
+      // variants stay visible in the row's tooltip so nothing is silently renamed.
+      const variants = Object.keys(group.variants).sort((a, b) => group.variants[b] - group.variants[a]);
+      group.name = variants[0];
+      group.variants = variants;
+      group.projects.sort((a, b) => b.minutes - a.minutes);
+    });
+    list.sort((a, b) => b.minutes - a.minutes);
+
+    return { groups: list, categoryTotals, categories: sortCategories(categoryTotals), total };
+  }
+
+  function buildCategorySummary(data, classes) {
+    const wrap = document.createElement('div');
+    wrap.className = 'jbe-report-catsummary';
+
+    const bar = document.createElement('div');
+    bar.className = 'jbe-report-catbar';
+    data.categories.forEach((category) => {
+      const seg = document.createElement('div');
+      seg.className = `jbe-report-catbar-seg ${classes[category]}`;
+      seg.style.width = `${(data.categoryTotals[category] / (data.total || 1)) * 100}%`;
+      seg.title = `${category}: ${minutesToHHMM(data.categoryTotals[category])}`;
+      bar.appendChild(seg);
+    });
+    wrap.appendChild(bar);
+
+    const stats = document.createElement('div');
+    stats.className = 'jbe-report-catstats';
+    data.categories.forEach((category) => {
+      const minutes = data.categoryTotals[category];
+      const stat = document.createElement('div');
+      stat.className = 'jbe-report-catstat';
+      const swatch = document.createElement('span');
+      swatch.className = `jbe-report-daybar-swatch ${classes[category]}`;
+      const name = document.createElement('span');
+      name.className = 'jbe-report-catstat-name';
+      name.textContent = category;
+      const value = document.createElement('span');
+      value.className = 'jbe-report-catstat-value';
+      value.textContent = minutesToHHMM(minutes);
+      const pct = document.createElement('span');
+      pct.className = 'jbe-report-catstat-pct';
+      pct.textContent = `${data.total ? Math.round((minutes / data.total) * 100) : 0}%`;
+      stat.appendChild(swatch);
+      stat.appendChild(name);
+      stat.appendChild(value);
+      stat.appendChild(pct);
+      stats.appendChild(stat);
+    });
+    wrap.appendChild(stats);
+    return wrap;
+  }
+
+  function buildClientPanel(agg) {
+    const wrap = document.createDocumentFragment();
+    const data = aggregateClients(agg);
+
+    const title = document.createElement('h4');
+    title.className = 'jbe-report-section-title';
+    const titleText = document.createElement('span');
+    titleText.textContent = 'クライアント別工数';
+    title.appendChild(titleText);
+    wrap.appendChild(title);
+
+    if (!data.groups.length) {
+      const empty = document.createElement('div');
+      empty.className = 'jbe-report-empty';
+      empty.textContent = '集計できる工数がありません';
+      wrap.appendChild(empty);
+      return wrap;
+    }
+
+    const classes = categoryClassMap(data.categories);
+    wrap.appendChild(buildCategorySummary(data, classes));
+
+    const bars = document.createElement('div');
+    bars.className = 'jbe-report-bars';
+    const max = data.groups.reduce((m, g) => Math.max(m, g.minutes), 1);
+
+    data.groups.forEach((group) => {
+      const row = document.createElement('details');
+      row.className = 'jbe-report-bar-row jbe-report-tasks';
+
+      const head = document.createElement('div');
+      head.className = 'jbe-report-bar-head';
+      const name = document.createElement('span');
+      name.className = 'jbe-report-bar-name';
+      name.textContent = group.name;
+      // Merged spellings are named here rather than in the row, so the number and
+      // the thing it counts can always be checked against each other.
+      name.title = group.variants.length > 1
+        ? `${group.name}（表記ゆれをまとめています: ${group.variants.join(' / ')}）`
+        : group.name;
+      const time = document.createElement('span');
+      time.className = 'jbe-report-bar-time';
+      const pct = data.total ? Math.round((group.minutes / data.total) * 100) : 0;
+      time.textContent = `${minutesToHHMM(group.minutes)} (${pct}%)`;
+      head.appendChild(name);
+      head.appendChild(time);
+
+      const main = document.createElement('div');
+      main.className = 'jbe-report-bar-main';
+      main.appendChild(head);
+      main.appendChild(buildCategoryTrack(group.byCategory, group.minutes, max, classes));
+
+      const summary = document.createElement('summary');
+      summary.className = 'jbe-report-bar-summary';
+      const caret = document.createElement('span');
+      caret.className = 'jbe-report-bar-caret';
+      caret.setAttribute('aria-hidden', 'true');
+      summary.appendChild(caret);
+      summary.appendChild(main);
+      row.appendChild(summary);
+
+      const detail = document.createElement('div');
+      detail.className = 'jbe-report-bar-detail jbe-report-sublist';
+      const subMax = group.projects.reduce((m, p) => Math.max(m, p.minutes), 1);
+      group.projects.forEach((project) => {
+        const sub = document.createElement('div');
+        sub.className = 'jbe-report-bar-main jbe-report-subrow';
+        const subHead = document.createElement('div');
+        subHead.className = 'jbe-report-bar-head';
+        const subName = document.createElement('span');
+        subName.className = 'jbe-report-bar-name';
+        subName.textContent = project.detail;
+        subName.title = project.name;
+        const subTime = document.createElement('span');
+        subTime.className = 'jbe-report-bar-time';
+        subTime.textContent = minutesToHHMM(project.minutes);
+        subHead.appendChild(subName);
+        subHead.appendChild(subTime);
+        sub.appendChild(subHead);
+        const byCategory = {};
+        byCategory[project.category] = project.minutes;
+        sub.appendChild(buildCategoryTrack(byCategory, project.minutes, subMax, classes));
+        detail.appendChild(sub);
+      });
+      row.appendChild(detail);
+      bars.appendChild(row);
+    });
+
+    wrap.appendChild(bars);
+    return wrap;
+  }
+
+  // --- 推移 -------------------------------------------------------------------
+  //
+  // The list page renders one month at a time through a Web Worker, so previous
+  // months cannot be scraped — they come from the REST API (scripts/manHourApi.js).
+  // Two facts shape the loading here:
+  //
+  //   * an achievement entry carries `unit_id` ULIDs, not names, so the category /
+  //     client split needs a second call to resolve them. The monthly TOTAL does
+  //     not — it is just a sum of `time` — so a failed resolve degrades to a
+  //     totals-only chart instead of an error.
+  //   * a month with no data (or a failed request) is a normal outcome. Months are
+  //     fetched independently and a failed one is drawn as a gap, not thrown.
+  const TREND_MONTHS = 6;
+  const TREND_CLIENT_ROWS = 8;
+
+  // Survives closing and reopening the report; the modal is rebuilt each time.
+  // `attempted` holds unit ids the resolve endpoint has already answered about —
+  // see loadTrend for why an unresolved id has to be remembered separately.
+  const trendState = { months: new Map(), labels: {}, attempted: new Set() };
+
+  function getAnchorMonth() {
+    const form = document.getElementById('search');
+    const read = (name) => Number((form && (form.querySelector(`[name="${name}"]`) || {}).value) || NaN);
+    const now = new Date();
+    const year = read('year');
+    const month = read('month');
+    return {
+      year: year > 2000 ? year : now.getFullYear(),
+      month: (month >= 1 && month <= 12) ? month : now.getMonth() + 1
+    };
+  }
+
+  function monthsEndingAt(anchor, count) {
+    const list = [];
+    for (let back = count - 1; back >= 0; back -= 1) {
+      const d = new Date(anchor.year, anchor.month - 1 - back, 1);
+      list.push({
+        year: d.getFullYear(),
+        month: d.getMonth() + 1,
+        label: `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}`
+      });
+    }
+    return list;
+  }
+
+  // Reopening the report after editing a day must not show the edited month's old
+  // total next to the list's new one. Only the anchor month can have changed under
+  // us — the others are closed periods — so just that one is dropped.
+  function invalidateTrendMonth(anchor) {
+    trendState.months.delete(`${anchor.year}-${anchor.month}`);
+  }
+
+  function fetchMonthRecords(api, month) {
+    const key = `${month.year}-${month.month}`;
+    if (!trendState.months.has(key)) {
+      // Cache the promise, not the result, so six columns never fire the same
+      // request twice — but drop a rejected one so 再試行 can actually retry.
+      trendState.months.set(key, api.getMonthAchievements(month.year, month.month).catch((err) => {
+        trendState.months.delete(key);
+        throw err;
+      }));
+    }
+    return trendState.months.get(key);
+  }
+
+  // Which of an entry's items is the project. With the project kind's whole unit
+  // map in hand this is simply "the one the map knows", which holds even when the
+  // kind lookup came back empty or the items are not in kind order — the two
+  // assumptions that left every client reading as 名称不明.
+  function projectUnitId(entry, projectKindId, projectLabels, taskLabels) {
+    const items = (entry && entry.items) || [];
+    if (projectLabels) {
+      const known = items.find((item) => item && item.unit_id && projectLabels[item.unit_id]);
+      if (known) return known.unit_id;
+    }
+    if (projectKindId) {
+      const hit = items.find((item) => item && String(item.kind_id) === String(projectKindId));
+      if (hit && hit.unit_id) return hit.unit_id;
+    }
+    // A project that has since expired is in no current unit list, so neither rule
+    // above can find it. What the TASK dimension owns is definitely not it, which
+    // is enough to pick the right item out of a two-item entry.
+    if (taskLabels && Object.keys(taskLabels).length) {
+      const notTask = items.find((item) => item && item.unit_id && !taskLabels[item.unit_id]);
+      if (notTask) return notTask.unit_id;
+    }
+    return (items[0] && items[0].unit_id) || null;
+  }
+
+  async function loadTrend(anchor) {
+    const api = window.JBE_ManHourApi;
+    if (!api || !api.getMonthAchievements) throw new Error('工数APIが利用できません');
+
+    const months = monthsEndingAt(anchor, TREND_MONTHS);
+    const fetched = await Promise.all(months.map((month) => fetchMonthRecords(api, month)
+      .then((records) => ({ month, records }))
+      .catch(() => ({ month, records: null }))));
+    if (fetched.every((entry) => !entry.records)) throw new Error('工数データを取得できませんでした');
+
+    let kinds = {};
+    try {
+      kinds = await api.resolveKinds(new Date(anchor.year, anchor.month - 1, 1));
+    } catch (e) {
+      kinds = {};
+    }
+    const projectKindId = kinds.projectKindId || ((kinds.kinds || [])[0] || {}).id || null;
+
+    // Both dimensions in one map each, usually straight out of the cache
+    // manHourEditSearch.js fills on page load (it pre-warms every kind). The project
+    // map is what actually puts names on six months of unit ids; the task map is
+    // only used to rule items out. The per-id endpoint below mops up the residue.
+    let projectLabels = {};
+    let taskLabels = {};
+    if (api.getKindUnitLabels) {
+      const today = new Date();
+      const taskKindId = kinds.taskKindId || ((kinds.kinds || [])[1] || {}).id || null;
+      const maps = await Promise.all([
+        api.getKindUnitLabels(projectKindId, today),
+        api.getKindUnitLabels(taskKindId, today)
+      ]);
+      projectLabels = maps[0];
+      taskLabels = maps[1];
+    }
+    Object.assign(trendState.labels, projectLabels);
+
+    // Flatten once: the chosen unit id per entry is needed both to find what still
+    // has no name and to bucket the minutes, and it must be the same id both times.
+    const rows = [];
+    fetched.forEach(({ month, records }, monthIndex) => {
+      (records || []).forEach((day) => (day.manhours || []).forEach((entry) => {
+        const minutes = api.secondsToMinutes(entry.time);
+        if (!minutes) return;
+        rows.push({
+          monthIndex,
+          month,
+          dayKey: day.date || day.id,
+          minutes,
+          unitId: projectUnitId(entry, projectKindId, projectLabels, taskLabels)
+        });
+      }));
+    });
+
+    const missing = Array.from(new Set(rows.map((row) => row.unitId).filter(Boolean)))
+      .filter((id) => !(id in trendState.labels) && !trendState.attempted.has(id));
+    if (missing.length && api.getUnitLabels) {
+      const resolved = await api.getUnitLabels(missing);
+      Object.assign(trendState.labels, resolved);
+      // An id the endpoint answered about but does not know will never resolve;
+      // remember it, or every reopen re-requests it. A call that resolved nothing
+      // at all is an outage rather than an answer — leave those retryable.
+      if (Object.keys(resolved).length) missing.forEach((id) => trendState.attempted.add(id));
+    }
+
+    const categoryTotals = {};
+    const clients = {};
+    let unresolved = 0;
+
+    const series = fetched.map(({ month, records }) => ({
+      month, failed: !records, minutes: 0, days: 0, dayKeys: new Set(), byCategory: {}, byClient: {}
+    }));
+
+    rows.forEach((row) => {
+      const bucket = series[row.monthIndex];
+      const name = stripCode(trendState.labels[row.unitId] || '');
+      // Same taxonomy as クライアント別 — one classifier, so a project cannot land
+      // under one client there and another here.
+      const info = name ? classifyProject(name) : { category: UNRESOLVED_CATEGORY, client: '' };
+      if (!name) unresolved += row.minutes;
+      const display = info.client || (name ? `【${info.category}】` : '(名称不明)');
+      const key = info.client ? `c:${normalizeClient(info.client)}` : `k:${display}`;
+
+      bucket.dayKeys.add(row.dayKey);
+      bucket.minutes += row.minutes;
+      bucket.byCategory[info.category] = (bucket.byCategory[info.category] || 0) + row.minutes;
+      bucket.byClient[key] = (bucket.byClient[key] || 0) + row.minutes;
+      categoryTotals[info.category] = (categoryTotals[info.category] || 0) + row.minutes;
+      if (!clients[key]) clients[key] = { key, variants: {}, total: 0 };
+      clients[key].total += row.minutes;
+      clients[key].variants[display] = (clients[key].variants[display] || 0) + row.minutes;
+    });
+    series.forEach((bucket) => { bucket.days = bucket.dayKeys.size; delete bucket.dayKeys; });
+
+    const clientRows = Object.keys(clients).map((key) => {
+      const client = clients[key];
+      const variants = Object.keys(client.variants).sort((a, b) => client.variants[b] - client.variants[a]);
+      return { key, name: variants[0], variants, total: client.total };
+    }).sort((a, b) => b.total - a.total);
+
+    return {
+      series,
+      categories: sortCategories(categoryTotals),
+      categoryTotals,
+      clientRows,
+      unresolved,
+      failedMonths: series.filter((bucket) => bucket.failed).map((bucket) => bucket.month.label),
+      anchorLabel: months[months.length - 1].label
+    };
+  }
+
+  function buildTrendChart(data, classes) {
+    const chart = document.createElement('div');
+    chart.className = 'jbe-report-daybars jbe-report-trend-chart';
+    const max = data.series.reduce((m, bucket) => Math.max(m, bucket.minutes), 1);
+
+    data.series.forEach((bucket) => {
+      const col = document.createElement('div');
+      col.className = 'jbe-report-daybar-col';
+      if (bucket.month.label === data.anchorLabel) col.classList.add('is-current');
+      const direct = bucket.byCategory[DIRECT_CATEGORY] || 0;
+      col.title = bucket.failed
+        ? `${bucket.month.label}: 取得できませんでした`
+        : `${bucket.month.label}: ${minutesToHHMM(bucket.minutes)} / ${bucket.days} 日`
+          + sortCategories(bucket.byCategory).map((c) => `\n  ${c}: ${minutesToHHMM(bucket.byCategory[c])}`).join('');
+
+      const bar = document.createElement('div');
+      bar.className = 'jbe-report-daybar-bar';
+      const fill = document.createElement('div');
+      fill.className = 'jbe-report-daybar-fill';
+      const value = document.createElement('span');
+      value.className = 'jbe-report-daybar-value';
+      if (!bucket.minutes) value.classList.add('is-zero');
+      value.textContent = bucket.failed ? '—' : minutesToHHMM(bucket.minutes);
+      fill.appendChild(value);
+      if (bucket.minutes > 0) {
+        // Same 82% cap as the day chart: the value printed above the tallest
+        // column has to stay inside the plot.
+        fill.style.height = `${Math.max(6, (bucket.minutes / max) * 82)}%`;
+        sortCategories(bucket.byCategory).forEach((category) => {
+          const seg = document.createElement('div');
+          seg.className = `jbe-report-daybar-seg ${classes[category] || 'jbe-cat-unknown'}`;
+          seg.style.height = `${(bucket.byCategory[category] / bucket.minutes) * 100}%`;
+          seg.title = `${category}: ${minutesToHHMM(bucket.byCategory[category])}`;
+          fill.appendChild(seg);
+        });
+      } else {
+        fill.classList.add('is-empty');
+      }
+      bar.appendChild(fill);
+
+      const label = document.createElement('div');
+      label.className = 'jbe-report-daybar-label';
+      const name = document.createElement('span');
+      name.textContent = bucket.month.label;
+      label.appendChild(name);
+      const sub = document.createElement('span');
+      sub.className = 'jbe-report-daybar-dow';
+      sub.textContent = bucket.minutes ? `直接 ${Math.round((direct / bucket.minutes) * 100)}%` : '—';
+      label.appendChild(sub);
+
+      col.appendChild(bar);
+      col.appendChild(label);
+      chart.appendChild(col);
+    });
+
+    return chart;
+  }
+
+  // Clients down the side, months across: the one layout that answers "is this
+  // client growing" at a glance. Everything past the top rows is folded into その他
+  // so the table stays readable rather than complete.
+  function buildTrendMatrix(data) {
+    const scroller = document.createElement('div');
+    scroller.className = 'jbe-report-matrix-scroll';
+    const table = document.createElement('table');
+    table.className = 'jbe-report-matrix';
+
+    const head = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    const corner = document.createElement('th');
+    corner.textContent = 'クライアント';
+    headRow.appendChild(corner);
+    data.series.forEach((bucket) => {
+      const th = document.createElement('th');
+      th.textContent = bucket.month.label.slice(-2);
+      th.title = bucket.month.label;
+      if (bucket.month.label === data.anchorLabel) th.className = 'is-current';
+      headRow.appendChild(th);
+    });
+    const totalHead = document.createElement('th');
+    totalHead.textContent = '合計';
+    headRow.appendChild(totalHead);
+    head.appendChild(headRow);
+    table.appendChild(head);
+
+    const top = data.clientRows.slice(0, TREND_CLIENT_ROWS);
+    const rest = data.clientRows.slice(TREND_CLIENT_ROWS);
+    const body = document.createElement('tbody');
+
+    const addRow = (name, title, byMonth, total, rowClass) => {
+      const tr = document.createElement('tr');
+      if (rowClass) tr.className = rowClass;
+      const th = document.createElement('th');
+      th.textContent = name;
+      th.title = title || name;
+      tr.appendChild(th);
+      data.series.forEach((bucket) => {
+        const td = document.createElement('td');
+        const minutes = byMonth(bucket);
+        td.textContent = minutes ? minutesToHHMM(minutes) : '·';
+        if (!minutes) td.className = 'is-zero';
+        tr.appendChild(td);
+      });
+      const totalCell = document.createElement('td');
+      totalCell.className = 'is-total';
+      totalCell.textContent = minutesToHHMM(total);
+      tr.appendChild(totalCell);
+      body.appendChild(tr);
+    };
+
+    top.forEach((client) => {
+      const title = client.variants.length > 1
+        ? `${client.name}（表記ゆれをまとめています: ${client.variants.join(' / ')}）`
+        : client.name;
+      addRow(client.name, title, (bucket) => bucket.byClient[client.key] || 0, client.total);
+    });
+    if (rest.length) {
+      addRow(`その他 ${rest.length} 件`, rest.map((c) => c.name).join(' / '),
+        (bucket) => rest.reduce((sum, c) => sum + (bucket.byClient[c.key] || 0), 0),
+        rest.reduce((sum, c) => sum + c.total, 0));
+    }
+    addRow('合計', '合計', (bucket) => bucket.minutes,
+      data.series.reduce((sum, bucket) => sum + bucket.minutes, 0), 'is-total');
+
+    table.appendChild(body);
+    scroller.appendChild(table);
+    return scroller;
+  }
+
+  function renderTrend(data, title, host) {
+    host.textContent = '';
+    const oldLegend = title.querySelector('.jbe-report-daybar-legend');
+    if (oldLegend) oldLegend.remove();
+
+    const total = data.series.reduce((sum, bucket) => sum + bucket.minutes, 0);
+    if (!total) {
+      const empty = document.createElement('div');
+      empty.className = 'jbe-report-empty';
+      empty.textContent = '直近の工数データがありません';
+      host.appendChild(empty);
+      return;
+    }
+
+    const classes = categoryClassMap(data.categories);
+    const legend = document.createElement('span');
+    legend.className = 'jbe-report-daybar-legend';
+    data.categories.forEach((category) => {
+      legend.appendChild(makeLegendItem(classes[category], category, minutesToHHMM(data.categoryTotals[category])));
+    });
+    title.appendChild(legend);
+
+    host.appendChild(buildTrendChart(data, classes));
+    host.appendChild(buildTrendMatrix(data));
+
+    const notes = [];
+    if (data.failedMonths.length) notes.push(`取得できなかった月: ${data.failedMonths.join('、')}`);
+    // Names come from a second endpoint. When it does not answer the hours are
+    // still right and only the split is unknown — say so rather than showing a
+    // silently mis-attributed chart.
+    if (data.unresolved) notes.push(`プロジェクト名を解決できない工数: ${minutesToHHMM(data.unresolved)}`);
+    if (notes.length) {
+      const note = document.createElement('div');
+      note.className = 'jbe-report-note';
+      note.textContent = notes.join(' / ');
+      host.appendChild(note);
+    }
+  }
+
+  function buildTrendPanel(anchor) {
+    const frag = document.createDocumentFragment();
+    const title = document.createElement('h4');
+    title.className = 'jbe-report-section-title';
+    const titleText = document.createElement('span');
+    titleText.textContent = `推移（直近${TREND_MONTHS}か月）`;
+    title.appendChild(titleText);
+    const host = document.createElement('div');
+    host.className = 'jbe-report-trend';
+    frag.appendChild(title);
+    frag.appendChild(host);
+
+    // The modal may be closed mid-flight; the nodes are simply detached by then and
+    // writing to them is harmless, so there is nothing to cancel.
+    const run = () => {
+      host.textContent = '';
+      const status = document.createElement('div');
+      status.className = 'jbe-report-status';
+      status.textContent = '読み込み中…';
+      host.appendChild(status);
+      loadTrend(anchor).then((data) => renderTrend(data, title, host)).catch((err) => {
+        host.textContent = '';
+        const fail = document.createElement('div');
+        fail.className = 'jbe-report-status is-error';
+        const message = document.createElement('span');
+        message.textContent = (err && err.message) || '読み込みに失敗しました';
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.className = 'jbe-report-retry';
+        retry.textContent = '再試行';
+        retry.addEventListener('click', run);
+        fail.appendChild(message);
+        fail.appendChild(retry);
+        host.appendChild(fail);
+      });
+    };
+    run();
+    return frag;
+  }
+
+  // --- other months ----------------------------------------------------------
+  //
+  // The list page renders exactly one month, so the report used to be "whatever
+  // the page shows". Both halves of what it needs are reachable for any other
+  // month without navigating away:
+  //
+  //   * the entries come from get-achievements-list — the same call the 推移 tab
+  //     already makes, through the same per-month promise cache, so stepping back
+  //     over months the trend already fetched costs nothing.
+  //   * the per-day 総労働時間 is NOT in the man-hour API at all. It comes from one
+  //     fetch of the 出勤簿 for that month, read by column HEADER exactly as
+  //     attendanceChart.js does (the column set varies by account, so an index
+  //     would silently read 休憩時間 as 労働時間).
+  //
+  // The list's own month keeps being read from the DOM: it is free, it is already
+  // rendered, and it is the one month whose numbers must agree with the table
+  // right below the modal.
+
+  const ATTENDANCE_URL = 'https://ssl.jobcan.jp/employee/attendance';
+  const ATTENDANCE_DATE_COL = '日付';
+  const ATTENDANCE_WORK_COL = '労働時間';
+  const WEEKDAY_BY_INDEX = ['日', '月', '火', '水', '木', '金', '土'];
+  const UNKNOWN_UNIT = '(名称不明)';
+
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const monthKey = (month) => `${month.year}-${month.month}`;
+  const monthLabelOf = (month) => `${month.year}/${pad2(month.month)}`;
+  const monthIndexOf = (month) => month.year * 12 + month.month;
+  const sameMonth = (a, b) => !!a && !!b && a.year === b.year && a.month === b.month;
+
+  function shiftMonth(month, delta) {
+    const d = new Date(month.year, month.month - 1 + delta, 1);
+    return { year: d.getFullYear(), month: d.getMonth() + 1 };
+  }
+
+  // Forward limit: the list page's own month, or the real current month when the
+  // page is showing an older one. There is nothing to report past that.
+  function latestReportMonth() {
+    const anchor = getAnchorMonth();
+    const now = new Date();
+    const current = { year: now.getFullYear(), month: now.getMonth() + 1 };
+    return monthIndexOf(anchor) > monthIndexOf(current) ? anchor : current;
+  }
+
+  // --- 出勤簿 for one month: the per-day 総労働時間 ------------------------------
+
+  const attendanceCache = new Map();
+
+  // Returns { "MM/DD": minutes } for the requested month, or null when the page
+  // holds no table we recognise. Only rows of that month are kept: a 期間検索
+  // account can render a range that straddles two months, and a day number alone
+  // would let those collide.
+  function parseAttendanceWorkTable(doc, month) {
+    const tables = Array.from(doc.querySelectorAll('table'));
+    for (const table of tables) {
+      if (!table.tBodies.length) continue;
+      const heads = Array.from(table.querySelectorAll('thead th'))
+        .map((th) => String(th.textContent || '').replace(/\s+/g, ''));
+      const dateIndex = heads.indexOf(ATTENDANCE_DATE_COL);
+      const workIndex = heads.indexOf(ATTENDANCE_WORK_COL);
+      if (dateIndex < 0 || workIndex < 0) continue;
+
+      const byDate = {};
+      Array.from(table.tBodies[0].rows).forEach((tr) => {
+        const dateCell = tr.cells[dateIndex];
+        const workCell = tr.cells[workIndex];
+        if (!dateCell || !workCell) return;
+        // The 日付 cell also carries Jobcan's 打刻修正 / 各種申請 dropdown, so its
+        // whole textContent reads "09/01(火)打刻修正休暇申請…" — take the link.
+        const link = dateCell.querySelector('a');
+        const parts = String((link || dateCell).textContent || '').match(/(\d{1,2})\/(\d{1,2})/);
+        if (!parts || Number(parts[1]) !== month.month) return;
+        byDate[`${pad2(parts[1])}/${pad2(parts[2])}`] = parseHHMMToMinutes(workCell.textContent) || 0;
+      });
+      if (Object.keys(byDate).length) return byDate;
+    }
+    return null;
+  }
+
+  function fetchAttendanceMonth(month) {
+    const key = monthKey(month);
+    if (!attendanceCache.has(key)) {
+      const url = `${ATTENDANCE_URL}?list_type=normal&search_type=month&year=${month.year}&month=${month.month}`;
+      // Cache the promise so re-visiting a month is one request, and drop a
+      // rejected one so 再試行 can actually retry.
+      const load = Promise.resolve()
+        .then(() => {
+          if (typeof fetchJobcanDocument !== 'function') throw new Error('出勤簿を取得できません');
+          return fetchJobcanDocument(url);
+        })
+        .then((doc) => {
+          const byDate = parseAttendanceWorkTable(doc, month);
+          if (!byDate) throw new Error('出勤簿を読み取れませんでした');
+          return byDate;
+        })
+        .catch((err) => {
+          attendanceCache.delete(key);
+          throw err;
+        });
+      attendanceCache.set(key, load);
+    }
+    return attendanceCache.get(key);
+  }
+
+  // --- unit names --------------------------------------------------------------
+
+  let labelMapsPromise = null;
+
+  // Kind ids are stable dimension definitions and the maps are whole-kind, so one
+  // resolve serves every month the report can show. Shape matches what
+  // projectUnitId() above expects.
+  function loadUnitLabelMaps() {
+    if (!labelMapsPromise) {
+      labelMapsPromise = (async () => {
+        const api = window.JBE_ManHourApi;
+        if (!api) return { projectKindId: null, projectLabels: {}, taskLabels: {} };
+        let kinds = {};
+        try {
+          kinds = await api.resolveKinds(new Date());
+        } catch (e) {
+          kinds = {};
+        }
+        const projectKindId = kinds.projectKindId || ((kinds.kinds || [])[0] || {}).id || null;
+        const taskKindId = kinds.taskKindId || ((kinds.kinds || [])[1] || {}).id || null;
+        if (!api.getKindUnitLabels) return { projectKindId, projectLabels: {}, taskLabels: {} };
+        const today = new Date();
+        const maps = await Promise.all([
+          api.getKindUnitLabels(projectKindId, today),
+          api.getKindUnitLabels(taskKindId, today)
+        ]);
+        return { projectKindId, projectLabels: maps[0] || {}, taskLabels: maps[1] || {} };
+      })().catch((err) => {
+        labelMapsPromise = null;
+        throw err;
+      });
+    }
+    return labelMapsPromise;
+  }
+
+  // --- one month, in the shape parseListDays() hands back ----------------------
+
+  // Measured: get-achievements-list dates are 'YYYY-MM-DD' — attendanceChart.js
+  // matches them against the 出勤簿 rows by that exact string.
+  function recordDayNumber(record) {
+    const m = String((record && record.date) || '').match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    return m ? Number(m[3]) : null;
+  }
+
+  async function loadApiMonth(month) {
+    const api = window.JBE_ManHourApi;
+    if (!api || !api.getMonthAchievements) throw new Error('工数APIが利用できません');
+
+    // Only the entries are load-bearing. Names and 出勤簿 each degrade on their own:
+    // an unnamed unit reads as (名称不明) and a missing 出勤簿 drops the work-time
+    // KPIs, but the hours themselves are right either way.
+    const emptyLabels = { projectKindId: null, projectLabels: {}, taskLabels: {} };
+    const [records, labels, attendance] = await Promise.all([
+      fetchMonthRecords(api, month),
+      loadUnitLabelMaps().catch(() => emptyLabels),
+      fetchAttendanceMonth(month).catch(() => null)
+    ]);
+
+    const { projectLabels, taskLabels } = labels;
+    const rows = [];
+    (records || []).forEach((record) => {
+      const dayNum = recordDayNumber(record);
+      if (!dayNum) return;
+      (record.manhours || []).forEach((entry) => {
+        const minutes = api.secondsToMinutes(entry.time);
+        if (!minutes) return;
+        const items = (entry && entry.items) || [];
+        const projectId = projectUnitId(entry, labels.projectKindId, projectLabels, taskLabels);
+        const taskId = (items.find((item) => item && item.unit_id && item.unit_id !== projectId) || {}).unit_id || null;
+        rows.push({ dayNum, minutes, projectId, taskId });
+      });
+    });
+
+    // A project that has since expired is in no current unit list. This is the same
+    // residual per-id lookup loadTrend does, sharing its store so an id the
+    // endpoint cannot name is asked about once per session, not once per month.
+    const known = (id) => !!(id && (projectLabels[id] || taskLabels[id] || trendState.labels[id]));
+    const ids = new Set();
+    rows.forEach((row) => { ids.add(row.projectId); ids.add(row.taskId); });
+    const missing = Array.from(ids).filter((id) => id && !known(id) && !trendState.attempted.has(id));
+    if (missing.length && api.getUnitLabels) {
+      try {
+        const resolved = await api.getUnitLabels(missing);
+        Object.assign(trendState.labels, resolved);
+        if (Object.keys(resolved).length) missing.forEach((id) => trendState.attempted.add(id));
+      } catch (e) { /* names stay unknown; the hours are still right */ }
+    }
+    const nameOf = (id) => {
+      if (!id) return '';
+      return projectLabels[id] || taskLabels[id] || trendState.labels[id] || UNKNOWN_UNIT;
+    };
+
+    // Every day of the month, so 対象 n 日 counts the same thing the list's own
+    // month does. aggregate() puts only worked / 未入力 days on the x-axis.
+    const dayCount = new Date(month.year, month.month, 0).getDate();
+    const byDate = new Map();
+    for (let d = 1; d <= dayCount; d += 1) {
+      const date = new Date(month.year, month.month - 1, d);
+      const key = `${pad2(month.month)}/${pad2(d)}`;
+      byDate.set(key, {
+        dateText: key,
+        weekday: WEEKDAY_BY_INDEX[date.getDay()],
+        isWeekend: date.getDay() === 0 || date.getDay() === 6,
+        sumMinutes: 0,
+        workMinutes: attendance ? (attendance[key] || 0) : null,
+        lastUpdate: '',
+        rows: [],
+        entries: []
+      });
+    }
+    rows.forEach((row) => {
+      const day = byDate.get(`${pad2(month.month)}/${pad2(row.dayNum)}`);
+      if (!day) return;
+      day.entries.push({ project: nameOf(row.projectId), task: nameOf(row.taskId), minutes: row.minutes });
+      day.sumMinutes += row.minutes;
+    });
+
+    return { days: Array.from(byDate.values()), hasWorkTime: !!attendance };
+  }
+
+  // --- report tabs ------------------------------------------------------------
+
+  function buildProjectPanel(agg) {
+    const frag = document.createDocumentFragment();
+    const barsTitle = document.createElement('h4');
+    barsTitle.className = 'jbe-report-section-title';
+    const barsTitleText = document.createElement('span');
+    barsTitleText.textContent = 'プロジェクト別工数';
+    barsTitle.appendChild(barsTitleText);
+    // The day-flag colours mean the same thing in every project's 日別内訳, so the
+    // legend belongs once next to the section title rather than under each chart.
+    const legend = buildReportLegend(agg, taskColorMap(agg));
+    if (legend) barsTitle.appendChild(legend);
+    frag.appendChild(barsTitle);
+    frag.appendChild(buildProjectBars(agg));
+    return frag;
+  }
+
+  // Panels are built on first activation and then kept: プロジェクト別 alone is
+  // already a project x day x task chart per row, and 推移 fetches six months over
+  // the network — neither belongs in the cost of opening the modal.
+  function buildReportTabs(agg, month) {
+    const frag = document.createDocumentFragment();
+    const strip = document.createElement('div');
+    strip.className = 'jbe-report-tabs';
+    strip.setAttribute('role', 'tablist');
+    const panels = document.createElement('div');
+    panels.className = 'jbe-report-panels';
+
+    const tabs = [
+      { id: 'project', label: 'プロジェクト別', build: () => buildProjectPanel(agg) },
+      { id: 'client', label: 'クライアント別', build: () => buildClientPanel(agg) },
+      { id: 'trend', label: '推移', build: () => buildTrendPanel(month) }
+    ];
+    const built = {};
+
+    function activate(id, focus) {
+      reportState.tab = id;
+      tabs.forEach((tab) => {
+        const on = tab.id === id;
+        tab.button.classList.toggle('is-active', on);
+        tab.button.setAttribute('aria-selected', on ? 'true' : 'false');
+        tab.button.tabIndex = on ? 0 : -1;
+        if (on && !built[tab.id]) {
+          const panel = document.createElement('div');
+          panel.className = 'jbe-report-panel';
+          panel.id = `jbe-report-panel-${tab.id}`;
+          panel.setAttribute('role', 'tabpanel');
+          panel.setAttribute('aria-labelledby', tab.button.id);
+          panel.appendChild(tab.build());
+          panels.appendChild(panel);
+          built[tab.id] = panel;
+        }
+        if (built[tab.id]) built[tab.id].hidden = !on;
+      });
+      if (focus) {
+        const active = tabs.find((tab) => tab.id === id);
+        if (active) active.button.focus();
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.id = `jbe-report-tab-${tab.id}`;
+      button.className = 'jbe-axis-tab jbe-report-tab';
+      button.setAttribute('role', 'tab');
+      button.setAttribute('aria-controls', `jbe-report-panel-${tab.id}`);
+      button.textContent = tab.label;
+      button.addEventListener('click', () => activate(tab.id));
+      // Roving tabindex: the strip is one stop, arrows move between tabs.
+      button.addEventListener('keydown', (e) => {
+        const step = e.key === 'ArrowRight' ? 1 : (e.key === 'ArrowLeft' ? -1 : 0);
+        if (step) {
+          e.preventDefault();
+          activate(tabs[(index + step + tabs.length) % tabs.length].id, true);
+        } else if (e.key === 'Home' || e.key === 'End') {
+          e.preventDefault();
+          activate(tabs[e.key === 'Home' ? 0 : tabs.length - 1].id, true);
+        }
+      });
+      tab.button = button;
+      strip.appendChild(button);
+    });
+
+    frag.appendChild(strip);
+    frag.appendChild(panels);
+    // Stepping to another month rebuilds the panels; land on the tab the user was
+    // reading rather than throwing them back to プロジェクト別.
+    activate(tabs.some((tab) => tab.id === reportState.tab) ? reportState.tab : tabs[0].id);
+    return frag;
+  }
+
+  // --- the modal --------------------------------------------------------------
+
+  // `month` is what the modal is showing, which starts as the list's month and
+  // then follows the ‹ › navigator. `tab` survives a month change; `token` voids
+  // a fetch whose month is no longer on screen.
+  const reportState = { month: null, tab: null, token: 0 };
+  const reportRefs = { body: null, label: null, prev: null, next: null, reset: null };
+
+  function buildKpis(agg) {
+    const kpis = document.createElement('div');
+    kpis.className = 'jbe-report-kpis';
+    kpis.appendChild(makeKpi('工数実績', minutesToHHMM(agg.grandMinutes), `${agg.entryCount} 件`));
+    if (agg.hasWorkTime) {
+      kpis.appendChild(makeKpi('総労働時間', minutesToHHMM(agg.totalWork), `${agg.activeDays} 稼働日`));
+      const diff = agg.totalWork - agg.grandMinutes;
+      kpis.appendChild(makeKpi('差分', `${diff < 0 ? '+' : ''}${minutesToHHMM(Math.abs(diff))}`, diff > 0 ? '工数不足' : (diff < 0 ? '工数超過' : '一致')));
+      kpis.appendChild(makeKpi('工数不一致', `${agg.mismatchDays} 日`, `対象 ${agg.dayCount} 日`));
+    } else {
+      // 総労働時間 lives on the 出勤簿, not in the man-hour API. Say it is unknown
+      // rather than printing a difference measured against nothing.
+      kpis.appendChild(makeKpi('総労働時間', '—', '出勤簿を取得できませんでした'));
+      kpis.appendChild(makeKpi('稼働日', `${agg.activeDays} 日`, `対象 ${agg.dayCount} 日`));
+    }
+    if (agg.unselectedProject || agg.unselectedTask) {
+      kpis.appendChild(makeKpi('未選択', `${agg.unselectedProject + agg.unselectedTask} 件`, `P:${agg.unselectedProject} / T:${agg.unselectedTask}`));
+    }
+    return kpis;
+  }
+
+  function paintReport(days, options) {
+    const host = reportRefs.body;
+    if (!host) return;
+    const agg = aggregate(days, options);
+    host.textContent = '';
+    // The KPI row covers the whole month and stays above the tabs; each tab owns
+    // its own section title and legend, because the colour dimension changes with it.
+    host.appendChild(buildKpis(agg));
+    host.appendChild(buildReportTabs(agg, reportState.month));
+  }
+
+  function reportStatus(text, onRetry) {
+    const host = reportRefs.body;
+    if (!host) return;
+    host.textContent = '';
+    const status = document.createElement('div');
+    status.className = onRetry ? 'jbe-report-status is-error' : 'jbe-report-status';
+    const message = document.createElement('span');
+    message.textContent = text;
+    status.appendChild(message);
+    if (onRetry) {
+      const retry = document.createElement('button');
+      retry.type = 'button';
+      retry.className = 'jbe-report-retry';
+      retry.textContent = '再試行';
+      retry.addEventListener('click', onRetry);
+      status.appendChild(retry);
+    }
+    host.appendChild(status);
+  }
+
+  function updateMonthNav() {
+    const month = reportState.month;
+    if (!month || !reportRefs.label) return;
+    const anchor = getAnchorMonth();
+    reportRefs.label.textContent = monthLabelOf(month);
+    reportRefs.next.disabled = monthIndexOf(month) >= monthIndexOf(latestReportMonth());
+    // The list below the modal still shows the anchor month, so offer one click
+    // back to the month whose numbers match it.
+    reportRefs.reset.hidden = sameMonth(month, anchor);
+    reportRefs.reset.textContent = monthLabelOf(anchor);
+  }
+
+  function renderReportMonth() {
+    const month = reportState.month;
+    if (!month || !reportRefs.body) return;
+    updateMonthNav();
+    const token = (reportState.token += 1);
+
+    // The list's own month is already rendered in the table — no request, no
+    // spinner, and the numbers are guaranteed to agree with it.
+    if (sameMonth(month, getAnchorMonth()) && listHasRows()) {
+      paintReport(parseListDays(), { hasWorkTime: true });
+      return;
+    }
+
+    reportStatus(`${monthLabelOf(month)} を読み込み中…`);
+    loadApiMonth(month).then((result) => {
+      if (token !== reportState.token) return;
+      paintReport(result.days, { hasWorkTime: result.hasWorkTime });
+    }).catch((err) => {
+      if (token !== reportState.token) return;
+      reportStatus((err && err.message) || '読み込みに失敗しました', renderReportMonth);
+    });
+  }
+
+  function showReportMonth(month) {
+    reportState.month = month;
+    renderReportMonth();
+  }
+
+  function buildMonthNav() {
+    const nav = document.createElement('div');
+    nav.className = 'jbe-report-monthnav';
+
+    const step = (delta, label, glyph) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'jbe-report-monthstep';
+      button.setAttribute('aria-label', label);
+      button.title = label;
+      button.textContent = glyph;
+      button.addEventListener('click', () => showReportMonth(shiftMonth(reportState.month, delta)));
+      return button;
+    };
+
+    const label = document.createElement('span');
+    label.className = 'jbe-report-month';
+    label.setAttribute('aria-live', 'polite');
+
+    const reset = document.createElement('button');
+    reset.type = 'button';
+    reset.className = 'jbe-report-month-reset';
+    reset.title = '一覧の月に戻る';
+    reset.addEventListener('click', () => showReportMonth(getAnchorMonth()));
+
+    reportRefs.prev = step(-1, '前の月', '‹');
+    reportRefs.next = step(1, '次の月', '›');
+    reportRefs.label = label;
+    reportRefs.reset = reset;
+
+    nav.appendChild(reportRefs.prev);
+    nav.appendChild(label);
+    nav.appendChild(reportRefs.next);
+    nav.appendChild(reset);
+    return nav;
+  }
+
   function openReport() {
     closeReport();
-    const days = parseListDays();
-    const agg = aggregate(days);
-    const monthLabel = getMonthLabel();
+    reportState.month = getAnchorMonth();
+    invalidateTrendMonth(reportState.month);
 
     const overlay = document.createElement('div');
     overlay.id = 'jbe-manhour-report';
@@ -995,48 +2161,31 @@
 
     const header = document.createElement('div');
     header.className = 'jbe-report-header';
+    const heading = document.createElement('div');
+    heading.className = 'jbe-report-heading';
     const title = document.createElement('h3');
-    title.textContent = monthLabel ? `工数レポート ${monthLabel}` : '工数レポート';
+    title.textContent = '工数レポート';
+    heading.appendChild(title);
+    heading.appendChild(buildMonthNav());
     const closeBtn = document.createElement('button');
     closeBtn.className = 'jbe-report-close';
     closeBtn.setAttribute('aria-label', 'Close');
     closeBtn.innerHTML = '&times;';
     closeBtn.addEventListener('click', closeReport);
-    header.appendChild(title);
+    header.appendChild(heading);
     header.appendChild(closeBtn);
 
     const body = document.createElement('div');
     body.className = 'jbe-report-body';
-
-    const kpis = document.createElement('div');
-    kpis.className = 'jbe-report-kpis';
-    kpis.appendChild(makeKpi('工数実績', minutesToHHMM(agg.grandMinutes), `${agg.entryCount} 件`));
-    kpis.appendChild(makeKpi('総労働時間', minutesToHHMM(agg.totalWork), `${agg.activeDays} 稼働日`));
-    const diff = agg.totalWork - agg.grandMinutes;
-    kpis.appendChild(makeKpi('差分', `${diff < 0 ? '+' : ''}${minutesToHHMM(Math.abs(diff))}`, diff > 0 ? '工数不足' : (diff < 0 ? '工数超過' : '一致')));
-    kpis.appendChild(makeKpi('工数不一致', `${agg.mismatchDays} 日`, `対象 ${agg.dayCount} 日`));
-    if (agg.unselectedProject || agg.unselectedTask) {
-      kpis.appendChild(makeKpi('未選択', `${agg.unselectedProject + agg.unselectedTask} 件`, `P:${agg.unselectedProject} / T:${agg.unselectedTask}`));
-    }
-    body.appendChild(kpis);
-
-    const barsTitle = document.createElement('h4');
-    barsTitle.className = 'jbe-report-section-title';
-    const barsTitleText = document.createElement('span');
-    barsTitleText.textContent = 'プロジェクト別工数';
-    barsTitle.appendChild(barsTitleText);
-    // The day-flag colours mean the same thing in every project's 日別内訳, so the
-    // legend belongs once next to the section title rather than under each chart.
-    const legend = buildReportLegend(agg, taskColorMap(agg));
-    if (legend) barsTitle.appendChild(legend);
-    body.appendChild(barsTitle);
-    body.appendChild(buildProjectBars(agg));
+    reportRefs.body = body;
 
     modal.appendChild(header);
     modal.appendChild(body);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
     document.addEventListener('keydown', onReportKeydown);
+
+    renderReportMonth();
   }
 
   function onReportKeydown(e) {
@@ -1047,6 +2196,10 @@
     const existing = document.getElementById('jbe-manhour-report');
     if (existing) existing.remove();
     document.removeEventListener('keydown', onReportKeydown);
+    // Void whatever month fetch is still in flight: its nodes are gone, and the
+    // next open must not be painted by it.
+    reportState.token += 1;
+    Object.keys(reportRefs).forEach((key) => { reportRefs[key] = null; });
   }
 
   // --- orchestration: wait for the worker, then enhance ----------------------

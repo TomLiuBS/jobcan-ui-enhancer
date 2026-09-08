@@ -138,9 +138,53 @@ endpoints. Times in API responses are in **seconds**.
 in range".** A month with no man-hour period yet returns `[]` — measured: 2026-08
 returned `[]` while 2026-07 and 2026-06 each returned the 2 kinds, and a
 multi-month window also returned `[]`. Anything that resolves kind ids must fall
-back to earlier months (`manHourEditSearch.js` walks back up to 3). Kind ids are
-stable dimension definitions, so a previous month's id works fine for a
-current-month date.
+back to earlier months; both `manHourEditSearch.js` and `manHourApi.resolveKinds`
+walk back up to 3. Kind ids are stable dimension definitions, so a previous
+month's id works fine for a current-month date.
+
+**Three features call this API at runtime**; everything else reads the rendered
+DOM. The report modal's 推移 tab fetches six months, its month navigator (‹ ›)
+fetches one whole month whenever it leaves the month the list page is showing,
+and the 出勤簿 chart's hover card fetches one for its 工数入力状況 line. Monthly
+totals are a plain sum of
+`get-achievements-list`'s `time`, so they never depend on names; months are
+fetched independently and a failed one is drawn as a gap. Measured from
+`/employee/attendance`: `get-achievements-list` answers on the session cookie
+alone (that page has no `#token`), `to` is **exclusive** (`from=2026-08-01&
+to=2026-09-01` returned August only), and its per-day `time` sums matched the
+出勤簿's 労働時間 on all 18 worked days. `jsonFetch` appends `token=` from `#token`
+when the page has one, which is what Jobcan's own workers do.
+
+**The man-hour API carries no 総労働時間**, so the report's month navigator gets it
+from one `fetch` of `/employee/attendance?list_type=normal&search_type=month&
+year=&month=`, read by column HEADER (same rule as `attendanceChart.js`) and
+filtered to rows whose MM matches the requested month — a 期間検索 account can
+render a range that straddles two months. Re-measured 2026-09-08 for 2026-07 and
+2026-08: ~530ms, 31 rows each, and August's per-day `time` sum (10193 min over 86
+entries, 18 days) matched the 出勤簿 total exactly. A month whose 出勤簿 fetch
+fails still renders — `aggregate(days, { hasWorkTime: false })` drops the
+総労働時間 / 差分 / 不一致 KPIs and the day flags instead of computing them against
+a zero, which would flag every worked day.
+
+**Naming a `unit_id` goes through the unit list, not through `get-units`.**
+An achievement entry carries only ULIDs, and the per-id endpoint did not answer —
+every client came out 名称不明. What works is the whole-kind map:
+`manHourEditSearch.js` pre-warms the full unit list for *every* kind on each
+man-hour page load (the achievement-list page included) and caches it in
+localStorage as `jbe_mh_units_v2:<kid>` → `{ t, date, d: { ulid: "(code)name" } }`.
+It runs in the MAIN world, but localStorage is per-origin, so
+`manHourApi.getKindUnitLabels` reads the map the picker already paid for — free on
+a warm cache, ~9 paged requests cold. **Do not change that record shape without
+updating both modules, and do not write to that key from the isolated world**: it
+is keyed by kind alone with the build date kept only as a revalidation hint, so
+seeding it for another date would feed the edit page's picker units that are not
+selectable on the day being edited.
+
+Which item of an entry is the project is then decided by *the map that knows it*,
+not by kind order — `items` is not reliably project-first and `resolveKinds` can
+answer nothing. The task map is loaded only to rule items out, for an expired
+project that has left the current list; `get-units` survives as the last-resort
+lookup for exactly that residue.
 
 **Attendance/punch data is mostly server-rendered**, so `dataExtraction.js` uses
 `fetch` + `DOMParser` (see `fetchJobcanDocument`). Two exceptions, both measured:
@@ -153,6 +197,15 @@ current-month date.
   `POST /employee/attendance/download` → `{processId, downloadId}`, poll
   `/employee/attendance/progress?processId=`, then
   `/employee/attendance/get-file?download_id=`.
+
+**The 出勤簿 table is read by column HEADER, not by index** (`attendanceChart.js`).
+The column set varies by account and by `list_type` / 期間検索, and an index
+pointing one column over draws 休憩時間 as 労働時間 — a wrong chart that looks
+right. Three things measured on the live page and easy to trip on: the 日付 cell
+also contains Jobcan's 打刻修正/各種申請 dropdown, so its `textContent` is
+`"09/01(火)打刻修正休暇申請…"` and the date must come from the `<a>`; 退勤時刻 reads
+`(勤務中)` on a day still in progress; and 勤怠状況 carries `有` for paid leave while
+休日区分 carries 公休 / 法休 / 祝日公休.
 
 `docs/jobcan-endpoints.md` has the full map, recovered by reading Jobcan's own
 public JS under `/st/` — that is the cheapest way to answer "is there an endpoint

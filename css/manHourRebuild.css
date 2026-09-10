@@ -940,6 +940,54 @@
 }
 
 /* ----------------------------------------------------------------------- */
+/* Man-hour edit page: date lead-in on the page heading                     */
+/* ----------------------------------------------------------------------- */
+
+/* setupEditTitleDate() (manHourEdit.js) prepends the edited day to `h2.mb-3`.
+   Flex rather than an inline span so a narrow window drops 工数実績入力 onto its
+   own line as a unit instead of wrapping the chip apart from its date.
+
+   `center`, not the `baseline` you'd reach for between two runs of text: the date
+   is a padded chip, so sharing a baseline with the 26px heading drops its box
+   ~3.6px low (measured) and it visibly rides under the title. Centring the two
+   boxes lands the chip within 0.3px of the heading's line-box centre. */
+.jobcan-enhanced h2.jbe-mh-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+/* A chip, not heading-sized text: the date leads the row but must not compete
+   with the title for it. */
+.jobcan-enhanced .jbe-mh-title-date {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 3px 11px;
+  border: 1px solid var(--color-border, #dee2e6);
+  border-radius: 999px;
+  background: var(--color-card, #fff);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--color-text-primary, #212529);
+  font-variant-numeric: tabular-nums;
+}
+
+.jobcan-enhanced .jbe-mh-title-dow {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+/* Same 曜日 convention as the report/出勤簿 axes. */
+.jobcan-enhanced .jbe-mh-title-dow.is-weekend {
+  color: var(--color-danger, #DC3545);
+  opacity: 0.9;
+}
+
+/* ----------------------------------------------------------------------- */
 /* Man-hour edit page: compact 工数情報 summary header + date/nav row        */
 /* ----------------------------------------------------------------------- */
 

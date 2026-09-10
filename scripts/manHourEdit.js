@@ -888,6 +888,71 @@
   }
 
   // ---------------------------------------------------------------------------
+  // 6. Date lead-in on the page heading
+  // ---------------------------------------------------------------------------
+  //
+  // The heading (`h2.mb-3`, a direct child of .jbc-container) reads only
+  // 工数実績入力 — which day you are editing is stated nowhere above the fold
+  // except in the ymd selects, which now sit inside the nav row below the summary
+  // card. Prepend the date to the heading so the day is the first thing read.
+  //
+  // Source of truth is getCurrentEditDate() (the #year/#month/#day selects, URL
+  // params as fallback). Those selects cannot drift from the rendered day: their
+  // inline onchange calls Jobcan's adjustDate(), which navigates immediately.
+
+  const WEEKDAY_JP = ['日', '月', '火', '水', '木', '金', '土'];
+
+  function getEditPageHeading() {
+    const container = document.querySelector('.jbc-container');
+    // Direct child only — the cards below carry their own 工数情報 / 備考 headings.
+    return container ? container.querySelector(':scope > h2') : null;
+  }
+
+  // Idempotent: builds the spans once, then only rewrites their text.
+  function setupEditTitleDate() {
+    const heading = getEditPageHeading();
+    if (!heading) return false;
+    const date = getCurrentEditDate();
+    if (!date) return false;
+
+    let lead = heading.querySelector(':scope > .jbe-mh-title-date');
+    if (!lead) {
+      // Wrap the native title in a span of its own so the heading can be a flex
+      // row whose two parts wrap as units instead of breaking mid-word.
+      const text = document.createElement('span');
+      text.className = 'jbe-mh-title-text';
+      while (heading.firstChild) text.appendChild(heading.firstChild);
+
+      lead = document.createElement('span');
+      lead.className = 'jbe-mh-title-date';
+      const ymd = document.createElement('span');
+      ymd.className = 'jbe-mh-title-ymd';
+      const dow = document.createElement('span');
+      dow.className = 'jbe-mh-title-dow';
+      lead.appendChild(ymd);
+      lead.appendChild(dow);
+
+      heading.classList.add('jbe-mh-title');
+      heading.appendChild(lead);  // date first...
+      heading.appendChild(text);  // ...then 工数実績入力
+    }
+
+    const ymd = lead.querySelector('.jbe-mh-title-ymd');
+    const dow = lead.querySelector('.jbe-mh-title-dow');
+    if (ymd) {
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      ymd.textContent = `${date.getFullYear()}/${m}/${d}`;
+    }
+    if (dow) {
+      const day = date.getDay();
+      dow.textContent = `(${WEEKDAY_JP[day]})`;
+      dow.classList.toggle('is-weekend', day === 0 || day === 6);
+    }
+    return true;
+  }
+
+  // ---------------------------------------------------------------------------
   // Orchestration
   // ---------------------------------------------------------------------------
 
@@ -917,6 +982,9 @@
     setupDecimalHoursNormalizer();
 
     const init = () => {
+      // Before the table check: the heading is server-rendered and its date comes
+      // from the ymd selects / URL, so it never has to wait for the worker.
+      setupEditTitleDate();
       const table = getEditTable();
       if (!table) return false;
       enhanceExistingRows(document);

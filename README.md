@@ -58,7 +58,7 @@ confetti.min.js        打刻時の演出
 | `requestStatus.js` | 申請一覧のステータスバッジ |
 | `emptyState.js` | 申請一覧の空状態表示 |
 | `manHourApi.js` | 工数管理 REST API クライアント |
-| `manHourEdit.js` | 工数実績入力ページ（サマリーヘッダー・日付ナビ・プロジェクト名マスク） |
+| `manHourEdit.js` | 工数実績入力ページ（見出しの日付・サマリーヘッダー・日付ナビ・プロジェクト名マスク） |
 | `manHourList.js` | 工数実績一覧ページ（フィルタ・不一致ハイライト・レポート） |
 | `attendanceChart.js` | 出勤簿ページの労働時間バーチャート（ページ内の表から集計） |
 | `manHourEditSearch.js` | プロジェクト検索の部分一致対応（**MAIN ワールド**で実行） |
